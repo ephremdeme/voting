@@ -157,7 +157,7 @@ def registerBulkNodes():
             if(node!=currentNodeURl):
                 blockchain.addNode(node)
     
-    return jsonify({'note' : "bulk registration successfull"})
+    return jsonify({'note' : "bulk registration successfull"}), 200
 
 @app.route('/consensus', methods = ['GET'])
 def consensus():
