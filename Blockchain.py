@@ -1,7 +1,6 @@
 from datetime import datetime
 from uuid import uuid4
 import json
-from urlparse import urlparse
 import hashlib
 
 class Blockchain:
@@ -42,7 +41,6 @@ class Blockchain:
 
     def addToPendingTransaction(self, transaction):
         self.pendingTransaction.append(transaction)
-        print 11
         return self.getLastBlock()['index'] + 1
 
     def hashBlock(self, blockData, nonce ):
@@ -69,8 +67,6 @@ class Blockchain:
                 }
             blockHash = self.hashBlock(blockData, currentBlock['nonce'])
             if(blockHash[:4] != '0000'):
-                print blockHash 
-                print currentBlock['hash']
                 return False
             if (currentBlock['previousBlockHash']!= prevBlock['hash']):
                 return False

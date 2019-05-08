@@ -1,12 +1,9 @@
 from flask import Flask, jsonify, request
 import requests
 from uuid import uuid4
-from urlparse import urlparse
 from Blockchain import Blockchain
 from sys import argv
 from logging import log
-
-
 
 
 # Creating a Web App
@@ -21,7 +18,6 @@ blockchain = Blockchain()
 
 @app.route("/", methods = ['GET'])
 def home():
-    app.logger.info("is recieving transaction" )
     return jsonify({'chain' : blockchain.chain, 
     'pendingTransaction': blockchain.pendingTransaction,
     'networkNode' : blockchain.networkNodes})
@@ -53,7 +49,6 @@ def transactionBroadcast():
 
 @app.route('/mine', methods = ['GET'])
 def mine():
-    app.logger.info("is recieving transaction" )
     lastBlock = blockchain.getLastBlock()
     blockData = {
         'transactions' : blockchain.pendingTransaction,
