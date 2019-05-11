@@ -4,7 +4,7 @@ import json
 import hashlib
 from Transaction import Transaction
 
-
+from Block import Block
 
 class Blockchain:
 
@@ -15,15 +15,7 @@ class Blockchain:
         self.createBlock(1, '0', '0')
 
     def createBlock(self, nonce , prevHash, blockHash):
-        block = {
-            'index'             : len(self.chain) + 1,
-            'timestamp'         : str(datetime.now()),
-            'transactions'      : self.pendingTransaction,
-            'nonce'             : nonce,
-            'hash'              : blockHash,
-            'previousBlockHash' : prevHash
-        }
-
+        block = Block(nonce, prevHash, blockHash, len(self.chain)+1, self.pendingTransaction)
         self.pendingTransaction = []
 
         self.chain.append(block)
@@ -41,7 +33,7 @@ class Blockchain:
         if(not transaction.is_valid()):
             raise Exception('Inavlid Transaction')
         self.pendingTransaction.append(transaction)
-        return self.getLastBlock()['index'] + 1
+        return self.getLastBlock().index + 1
 
     def hashBlock(self, blockData, nonce ):
         blockData['nonce'] = nonce
@@ -64,21 +56,21 @@ class Blockchain:
             if(not self.has_valid_transaction(currentBlock)):
                 return False
             blockData = {
-                'transactions' : currentBlock['transactions'],
-                'index'        : prevBlock['index'] + 1
+                'transactions' : currentBlock.transaction,
+                'index'        : prevBlock.index + 1
                 }
-            blockHash = self.hashBlock(blockData, currentBlock['nonce'])
+            blockHash = self.hashBlock(blockData, currentBlock.nonce)
             if(blockHash[:4] != '0000'):
                 return False
-            if (currentBlock['previousBlockHash']!= prevBlock['hash']):
+            if (currentBlock.previousBlockHash!= prevBlock.hash):
                 return False
         return True
 
     def has_valid_transaction(self, block):
-        for tx in block['transaction']:
-            if(not tx.is_valid()):
-                return False
-        return True
+        if(block.isBlockValid()):
+            return True
+        else :
+            return False
 
     def addNode(self, address):
         self.networkNodes.append(address)
@@ -86,13 +78,6 @@ class Blockchain:
     def serialize_chain(self):
         display  = []
         for block in self.chain:
-            display.append({
-            'index'             : block['index'],
-            'timestamp'         : block['timestamp'],
-            'transactions'      : [e.serialize() for e in block['transactions']],
-            'nonce'             : block['nonce'],
-            'hash'              : block['hash'],
-            'previousBlockHash' : block['previousBlockHash']
-        })
+            display.append(block.serialize())
         return display
             
