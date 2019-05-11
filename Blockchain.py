@@ -79,6 +79,5 @@ class Blockchain:
         display  = []
         for block in self.chain:
             display.append(block.serialize())
-
         return display
             
