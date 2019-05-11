@@ -82,3 +82,4 @@ class Blockchain:
 
     def addNode(self, address):
         self.networkNodes.append(address)
+
