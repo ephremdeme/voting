@@ -68,14 +68,16 @@ def mine():
     lastBlock = blockchain.getLastBlock()
     blockData = {
         'transactions' : jsonpickle.encode(blockchain.pendingTransaction),
-        'index'        : lastBlock['index']+1
+        'index'        : lastBlock.index+1
+
         }
     
     # finding nonce for the block
     nonce = blockchain.proofOfWork(blockData)
     # generating hash for the block and mining
     blockHash = blockchain.hashBlock(blockData, nonce)
-    block = blockchain.createBlock(nonce, lastBlock['hash'], blockHash )
+    block = blockchain.createBlock(nonce, lastBlock.hash, blockHash )
+    block = jsonpickle.encode(block)
     for node in blockchain.networkNodes:
         log(1, "the block is transmitted to" + str(node))
         requests.post(node + '/receive-new-block', json={'newBlock' : block})
@@ -96,8 +98,10 @@ def mine():
 
     
     # r=requests.post( currentNodeURl + '/transaction/broadcast', json=transaction)
+    block = jsonpickle.decode(block)
     response = {'message': 'Congratulations, you just mined a block!',
-                'block': [e.serialize() for e in block['transactions']]}
+                'block': block.serialize()}
+
 
     log(1, "minning completed successfully")
     return jsonify(response), 200
@@ -106,25 +110,26 @@ def mine():
 def receiveNewBlock():
     json = request.get_json()
     newBlock = json['newBlock']
+    newBlock = jsonpickle.decode(newBlock)
     lastBlock = blockchain.getLastBlock()
 
     # checking weather hash is maching and has valid transaction
     # befor accepting a new block
 
-    correctHash = lastBlock['hash']==newBlock['previousBlockHash']
-    correctIndex = lastBlock['index']+1 ==newBlock['index']
+    correctHash = lastBlock.hash==newBlock.previousBlockHash
+    correctIndex = lastBlock.index+1 ==newBlock.index
     has_valid_tx = blockchain.has_valid_transaction(newBlock)
     if(correctHash and correctIndex and has_valid_tx):
         blockchain.chain.append(newBlock)
         blockchain.pendingTransaction = []
         return jsonify({
 			'note': 'New block received and accepted.',
-			'newBlock': [e.serialize() for e in newBlock['transaction']]
+			'newBlock': [e.serialize() for e in newBlock.transaction]
 		})
     else:
         return jsonify({
 			'note': 'New block received and rejected.',
-			'newBlock': [e.serialize() for e in newBlock['transaction']]
+			'newBlock': [e.serialize() for e in newBlock.transaction]
 		})
 
 

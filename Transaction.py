@@ -45,6 +45,7 @@ class Transaction :
 private_key = keys.gen_private_key(curve.P256)
 
 public_key  = keys.get_public_key(private_key, curve.P256)
+print(public_key)
 print('priva_key ', private_key)
 
 Tx1 = Transaction(public_key, 'to add', 1223)
