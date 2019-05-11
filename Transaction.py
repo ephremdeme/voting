@@ -11,6 +11,7 @@ class Transaction :
         self.to_address = to_address
         self.amount = amount
         self.id = str(uuid4()).replace('-', '')
+        self.signature = None
         
     def calculate_hash(self):
         return sha256((str(self.from_address)  + str(self.to_address)  + str(self.amount) +self.id).encode()).hexdigest()
@@ -44,6 +45,7 @@ class Transaction :
 private_key = keys.gen_private_key(curve.P256)
 
 public_key  = keys.get_public_key(private_key, curve.P256)
+print(public_key)
 print('priva_key ', private_key)
 
 Tx1 = Transaction(public_key, 'to add', 1223)
