@@ -82,3 +82,17 @@ class Blockchain:
 
     def addNode(self, address):
         self.networkNodes.append(address)
+    
+    def serialize_chain(self):
+        display  = []
+        for block in self.chain:
+            display.append({
+            'index'             : block['index'],
+            'timestamp'         : block['timestamp'],
+            'transactions'      : [e.serialize() for e in block['transactions']],
+            'nonce'             : block['nonce'],
+            'hash'              : block['hash'],
+            'previousBlockHash' : block['previousBlockHash']
+        })
+        return display
+            

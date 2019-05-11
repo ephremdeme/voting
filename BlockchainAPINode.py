@@ -23,7 +23,7 @@ blockchain = Blockchain()
 
 @app.route("/", methods = ['GET'])
 def home():
-    return jsonify({'chain' : blockchain.chain, 
+    return jsonify({'chain' : blockchain.serialize_chain(), 
     'pendingTransaction':  [e.serialize() for e in blockchain.pendingTransaction],
     'networkNode' : blockchain.networkNodes})
     # return jsonify({'chain':blockchain.chain, 'networkNodes' : blockchain.networkNodes, 'pendingtransaction' : blockchain.pendingTransaction}), 200
@@ -67,7 +67,7 @@ def transactionBroadcast():
 def mine():
     lastBlock = blockchain.getLastBlock()
     blockData = {
-        'transactions' : blockchain.pendingTransaction,
+        'transactions' : jsonpickle.encode(blockchain.pendingTransaction),
         'index'        : lastBlock['index']+1
         }
     
@@ -84,11 +84,11 @@ def mine():
     log(1, "minning fee is being transmitted")
     transaction = {
 	    "sender" : None,
-	    "receiver" : node_address, 
+	    "receiver" : public_key, 
 	    "amount" : 12.5
     }
     transaction = blockchain.createNewTransaction(transaction['amount'], transaction['sender'], transaction['receiver'])
-    transaction.sign_tx(private_key)
+    
     blockchain.addToPendingTransaction(transaction)
 
     for node in blockchain.networkNodes:
@@ -97,7 +97,7 @@ def mine():
     
     # r=requests.post( currentNodeURl + '/transaction/broadcast', json=transaction)
     response = {'message': 'Congratulations, you just mined a block!',
-                'block': [e.serialize() for e in block['transaction']]}
+                'block': [e.serialize() for e in block['transactions']]}
 
     log(1, "minning completed successfully")
     return jsonify(response), 200

@@ -11,6 +11,7 @@ class Transaction :
         self.to_address = to_address
         self.amount = amount
         self.id = str(uuid4()).replace('-', '')
+        self.signature = None
         
     def calculate_hash(self):
         return sha256((str(self.from_address)  + str(self.to_address)  + str(self.amount) +self.id).encode()).hexdigest()
