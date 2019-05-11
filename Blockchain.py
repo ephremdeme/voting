@@ -2,6 +2,9 @@ from datetime import datetime
 from uuid import uuid4
 import json
 import hashlib
+from Transaction import Transaction
+
+
 
 class Blockchain:
 
@@ -30,16 +33,13 @@ class Blockchain:
     def getLastBlock(self):
         return self.chain[-1]
 
-    def createNewTransaction(self, amount, sender, receiver):
-        newTransaction={
-            'transactionID' : str(uuid4()).replace('-', ''),
-            'sender'   : sender,
-            'receiver' : receiver,
-            'amount'   : amount
-        }
+    def createNewTransaction(self, amount, from_address, to_address):
+        newTransaction= Transaction(from_address, to_address, amount)
         return newTransaction
 
     def addToPendingTransaction(self, transaction):
+        if(not transaction.is_valid()):
+            raise Exception('Inavlid Transaction')
         self.pendingTransaction.append(transaction)
         return self.getLastBlock()['index'] + 1
 
@@ -61,6 +61,8 @@ class Blockchain:
         for i in range(1, len(blockchain)):
             currentBlock = blockchain[i]
             prevBlock = blockchain[i-1]
+            if(not self.has_valid_transaction(currentBlock)):
+                return False
             blockData = {
                 'transactions' : currentBlock['transactions'],
                 'index'        : prevBlock['index'] + 1
@@ -72,30 +74,11 @@ class Blockchain:
                 return False
         return True
 
+    def has_valid_transaction(self, block):
+        for tx in block['transaction']:
+            if(not tx.is_valid()):
+                return False
+        return True
+
     def addNode(self, address):
         self.networkNodes.append(address)
-
-    
-# blockchain = Blockchain()
-# block = blockchain.createBlock(12, '0', '0')
-# test = {
-#     'index' : len(blockchain.chain) +1,
-#     'timestamp' : str(datetime.now()),
-#     'transaction' : blockchain.pendingTransaction
-# }
-# nonce=blockchain.proofOfWork(test)
-# prevHash= blockchain.getLastBlock()['previousBlockHash']
-# blockhash = blockchain.hashBlock(test, nonce)
-# block = blockchain.createBlock(nonce, prevHash, blockhash)
-# print block
-# test = {
-#     'index' : len(blockchain.chain) +1,
-#     'timestamp' : str(datetime.now()),
-#     'transaction' : blockchain.pendingTransaction
-# }
-# nonce=blockchain.proofOfWork(test)
-# prevHash= blockchain.getLastBlock()['hash']
-# blockhash = blockchain.hashBlock(test, nonce)
-# block = blockchain.createBlock(nonce, prevHash, blockhash)
-# print block
-# print blockchain.chain

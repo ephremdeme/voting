@@ -4,6 +4,11 @@ from uuid import uuid4
 from Blockchain import Blockchain
 from sys import argv
 from logging import log
+from fastecdsa import keys, curve
+import jsonpickle
+
+private_key = keys.gen_private_key(curve.P256)
+public_key = keys.get_public_key(private_key, curve.P256)
 
 
 # Creating a Web App
@@ -19,33 +24,44 @@ blockchain = Blockchain()
 @app.route("/", methods = ['GET'])
 def home():
     return jsonify({'chain' : blockchain.chain, 
-    'pendingTransaction': blockchain.pendingTransaction,
+    'pendingTransaction':  [e.serialize() for e in blockchain.pendingTransaction],
     'networkNode' : blockchain.networkNodes})
     # return jsonify({'chain':blockchain.chain, 'networkNodes' : blockchain.networkNodes, 'pendingtransaction' : blockchain.pendingTransaction}), 200
 
 @app.route('/transaction', methods = ['POST'])
 def addTransaction():
     json = request.get_json()
-    transaction_keys = ['sender', 'receiver', 'amount']
-    if not all(key in json for key in transaction_keys):
-        return 'Some elements of the transaction are missing', 400
+    try:
+        json = jsonpickle.decode(json)
+        index = blockchain.addToPendingTransaction(json)
+        
+    except Exception:
+        response = {'message': 'This transaction is invalid will not be added to Block '}
+        return response, 200
+
     
-    index = blockchain.addToPendingTransaction(json)
     response = {'message': 'This transaction will be added to Block '+str(index)}
     return jsonify(response), 201
 
 @app.route('/transaction/broadcast', methods = ['POST'] )
 def transactionBroadcast():
     json = request.get_json()
-    transaction = blockchain.createNewTransaction(json['amount'], json['sender'], json['receiver'])
-    blockchain.addToPendingTransaction(transaction)
+    transaction = blockchain.createNewTransaction(json['amount'], public_key, json['receiver'])
+    transaction.sign_tx(private_key)
+    try:
+        blockchain.addToPendingTransaction(transaction)
+    except Exception:
+        response = {'message': 'This transaction is invalid will not be added to Block '}
+        return response, 200
+    
     if(len(blockchain.networkNodes)==0):
         return 'empty'
+    transaction = jsonpickle.encode(transaction)
     for node in blockchain.networkNodes:
-        requests.post(node + '/transaction', json =json, timeout=0.01 )
+        requests.post(node + '/transaction', json = transaction, timeout=2 )
     
     return jsonify({'note': 'Transaction created and broadcast successfully.', 
-    'pendingTransaction': blockchain.pendingTransaction})
+    'pendingTransaction': [e.serialize() for e in blockchain.pendingTransaction]})
 
 @app.route('/mine', methods = ['GET'])
 def mine():
@@ -54,11 +70,12 @@ def mine():
         'transactions' : blockchain.pendingTransaction,
         'index'        : lastBlock['index']+1
         }
+    
+    # finding nonce for the block
     nonce = blockchain.proofOfWork(blockData)
+    # generating hash for the block and mining
     blockHash = blockchain.hashBlock(blockData, nonce)
     block = blockchain.createBlock(nonce, lastBlock['hash'], blockHash )
-    log(1, "block is mined ")
-    log(1, "block is being transmitted to peers ")
     for node in blockchain.networkNodes:
         log(1, "the block is transmitted to" + str(node))
         requests.post(node + '/receive-new-block', json={'newBlock' : block})
@@ -66,11 +83,12 @@ def mine():
 
     log(1, "minning fee is being transmitted")
     transaction = {
-	    "sender" : '000',
+	    "sender" : None,
 	    "receiver" : node_address, 
 	    "amount" : 12.5
     }
     transaction = blockchain.createNewTransaction(transaction['amount'], transaction['sender'], transaction['receiver'])
+    transaction.sign_tx(private_key)
     blockchain.addToPendingTransaction(transaction)
 
     for node in blockchain.networkNodes:
@@ -79,7 +97,7 @@ def mine():
     
     # r=requests.post( currentNodeURl + '/transaction/broadcast', json=transaction)
     response = {'message': 'Congratulations, you just mined a block!',
-                'block': block}
+                'block': [e.serialize() for e in block['transaction']]}
 
     log(1, "minning completed successfully")
     return jsonify(response), 200
@@ -89,19 +107,24 @@ def receiveNewBlock():
     json = request.get_json()
     newBlock = json['newBlock']
     lastBlock = blockchain.getLastBlock()
+
+    # checking weather hash is maching and has valid transaction
+    # befor accepting a new block
+
     correctHash = lastBlock['hash']==newBlock['previousBlockHash']
     correctIndex = lastBlock['index']+1 ==newBlock['index']
-    if(correctHash and correctIndex):
+    has_valid_tx = blockchain.has_valid_transaction(newBlock)
+    if(correctHash and correctIndex and has_valid_tx):
         blockchain.chain.append(newBlock)
         blockchain.pendingTransaction = []
         return jsonify({
 			'note': 'New block received and accepted.',
-			'newBlock': newBlock
+			'newBlock': [e.serialize() for e in newBlock['transaction']]
 		})
     else:
         return jsonify({
 			'note': 'New block received and rejected.',
-			'newBlock': newBlock
+			'newBlock': [e.serialize() for e in newBlock['transaction']]
 		})
 
 
@@ -171,14 +194,13 @@ def consensus():
                 bestChain = block['chain']
                 newPendingTransaction = block['pendingTransaction']
     
-    if  blockchain.isChainValid(bestChain) and len(bestChain) :
+    if  blockchain.isChainValid(bestChain) and len(bestChain):
         blockchain.chain = bestChain
         blockchain.pendingTransaction = newPendingTransaction
         return jsonify({'message' : 'This chain has been replaced ','chain' : bestChain})
     else:
         return jsonify({'all' : bestChain, 'best': blockchain.isChainValid(bestChain)})    
     
-
 
 
 app.run(host = '0.0.0.0', port = int(PORT))
