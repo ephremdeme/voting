@@ -77,6 +77,7 @@ def mine():
     blockData = {
         'transactions' : jsonpickle.encode(blockchain.pendingTransaction),
         'index'        : lastBlock.index+1
+
         }
     
     # finding nonce for the block
@@ -112,6 +113,7 @@ def mine():
     block = jsonpickle.decode(block)
     response = {'message': 'Congratulations, you just mined a block!',
                 'block': block.serialize()}
+
 
     log(1, "minning completed successfully")
     return jsonify(response), 200
