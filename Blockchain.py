@@ -36,11 +36,6 @@ class Blockchain:
     def replace(self, bestChain):
         self.file.replace(bestChain)
 
-
-    def createNewTransaction(self, amount, from_address, to_address):
-        newTransaction= Transaction(from_address, to_address, amount)
-        return newTransaction
-
     def addToPendingTransaction(self, transaction):
         if(not transaction.is_valid()):
             raise Exception('Inavlid Transaction')

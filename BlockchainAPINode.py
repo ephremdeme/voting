@@ -6,6 +6,7 @@ from sys import argv
 from logging import log
 from fastecdsa import keys, curve
 import jsonpickle
+from wallet import Wallet
 
 private_key = keys.gen_private_key(curve.P256)
 public_key = keys.get_public_key(private_key, curve.P256)
@@ -21,6 +22,8 @@ currentNodeURl = "http://localhost:" + str(PORT)
 # Creating a Blockchain
 blockchain = Blockchain(PORT)
 blockchain.readChain()
+wallet = Wallet()
+minnerWallet = Wallet()
 @app.route("/", methods = ['GET'])
 def home():
     return jsonify({'chain' : blockchain.serialize_chain(), 
@@ -54,13 +57,12 @@ def addTransaction():
 @app.route('/transaction/broadcast', methods = ['POST'] )
 def transactionBroadcast():
     json = request.get_json()
-    transaction = blockchain.createNewTransaction(json['amount'], public_key, json['receiver'])
-    transaction.sign_tx(private_key)
+    transaction = wallet.createTransaction( json['receiver'], json['amount'])
     try:
         blockchain.addToPendingTransaction(transaction)
     except Exception:
         response = {'message': 'This transaction is invalid will not be added to Block '}
-        return response, 200
+        return jsonify(response), 500
     
     if(len(blockchain.networkNodes)==0):
         return 'empty'
@@ -77,7 +79,6 @@ def mine():
     blockData = {
         'transactions' : jsonpickle.encode(blockchain.pendingTransaction),
         'index'        : lastBlock.index+1
-
         }
     
     # finding nonce for the block
@@ -97,10 +98,10 @@ def mine():
     log(1, "minning fee is being transmitted")
     transaction = {
 	    "sender" : None,
-	    "receiver" : public_key, 
+	    "receiver" : minnerWallet.address, 
 	    "amount" : 12.5
     }
-    transaction = blockchain.createNewTransaction(transaction['amount'], transaction['sender'], transaction['receiver'])
+    transaction = wallet.createTransaction( transaction['receiver'], transaction['amount'])
     
     blockchain.addToPendingTransaction(transaction)
     transaction = jsonpickle.encode(transaction)
@@ -233,5 +234,8 @@ def connectNode():
     return jsonify({'network nodes' :blockchain.networkNodes}) 
     
 
+@app.route('/vote', methods = ['GET'])
+def vote():
+    return jsonify({'vote counte': wallet.calculateVote(blockchain.chain)})
 
 app.run(host = '0.0.0.0', port = int(PORT))

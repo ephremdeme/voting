@@ -18,53 +18,38 @@ class Transaction :
         return sha256((str(self.from_address)  + str(self.to_address)  + str(self.amount) +self.id).encode()).hexdigest()
 
     def sign_tx(self, priv_key):
-        pub_key = keys.get_public_key(priv_key, curve.P256)
-        if(not self.from_address == pub_key):
-            raise Exception('public key not valid')
         hashTx = self.calculate_hash()
         self.signature = ecdsa.sign(hashTx, priv_key, hashfunc=sha256)
-        print(hashTx)
-        print('signature : ' ,self.signature )
+        
     
     def is_valid(self):
         if(self.signature == None):
             return True
-        if(len(self.signature) == 0):
+        if(len(self.signature) == 0 and self.to_address==None):
             return False
         hashTx = self.calculate_hash()
-        valid = ecdsa.verify(self.signature, hashTx, self.from_address, hashfunc=sha256)
-        print(valid)
+        pubkey = keys.get_public_keys_from_sig(self.signature, hashTx, curve=curve.P256,hashfunc=sha256 )
+        valid = ecdsa.verify(self.signature, hashTx, pubkey[0], hashfunc=sha256)
         return valid
+
     def serialize(self):
         return {
             'Tx_ID'        : self.id,
-            'from_address' : sha256(str(self.from_address).encode()).hexdigest(),
-            'to_address'   : sha256(str(self.to_address).encode()).hexdigest(),
+            'from_address' : self.from_address,
+            'to_address'   : self.to_address,
             'amount'       : self.amount
         }
-
-private_key = keys.gen_private_key(curve.P256)
-
-public_key  = keys.get_public_key(private_key, curve.P256)
-print(sha256( str(public_key).encode()).digest())
-print('priva_key ', private_key)
-
-h = hashlib.new('ripemd160')
-h.update(sha256( str(public_key).encode()).digest())
-print('ripemd' ,h.hexdigest())
-
-Tx1 = Transaction(public_key, 'to add', 1223)
-Tx1.sign_tx(private_key)
-Tx1.is_valid()
-
-
-
+    
 # private_key = keys.gen_private_key(curve.P256)
 
 # public_key  = keys.get_public_key(private_key, curve.P256)
+# print(sha256( str(public_key).encode()).digest())
 # print('priva_key ', private_key)
 
-# Tx2 = Transaction(public_key, 'to add', 12)
-# Tx2.signTx(private_key)
-# Tx2.verify()
-# print()
+# h = hashlib.new('ripemd160')
+# h.update(sha256( str(public_key).encode()).digest())
+# print('ripemd' ,h.hexdigest())
+
+# Tx1 = Transaction(public_key, 'to add', 1223)
+# Tx1.sign_tx(private_key)
+# Tx1.is_valid()
