@@ -1,18 +1,20 @@
 from datetime import datetime
 from uuid import uuid4
 import json
+import jsonpickle
 import hashlib
 from Transaction import Transaction
-
+from FileUtil import FileUtil
 from Block import Block
 
 class Blockchain:
 
-    def __init__(self):
+    def __init__(self, PORT):
         self.chain = []
         self.pendingTransaction = []
         self.networkNodes = []
-        self.createBlock(1, '0', '0')
+        self.file = FileUtil('json/' +str(PORT) +'.json')
+        self.file.storeGenesisBlock(self.createBlock(1, '0', '0'))
 
     def createBlock(self, nonce , prevHash, blockHash):
         block = Block(nonce, prevHash, blockHash, len(self.chain)+1, self.pendingTransaction)
@@ -24,6 +26,16 @@ class Blockchain:
 
     def getLastBlock(self):
         return self.chain[-1]
+    
+    def storeBlock(self, block):
+        self.file.write(block)
+    
+    def readChain(self):
+        self.chain = self.file.read()
+
+    def replace(self, bestChain):
+        self.file.replace(bestChain)
+
 
     def createNewTransaction(self, amount, from_address, to_address):
         newTransaction= Transaction(from_address, to_address, amount)
@@ -55,14 +67,17 @@ class Blockchain:
             prevBlock = blockchain[i-1]
             if(not self.has_valid_transaction(currentBlock)):
                 return False
+
             blockData = {
-                'transactions' : currentBlock.transaction,
+                'transactions' : jsonpickle.encode(currentBlock.transaction),
                 'index'        : prevBlock.index + 1
                 }
             blockHash = self.hashBlock(blockData, currentBlock.nonce)
             if(blockHash[:4] != '0000'):
                 return False
-            if (currentBlock.previousBlockHash!= prevBlock.hash):
+            correctHash = currentBlock.previousBlockHash == prevBlock.hash
+            correctIndex = currentBlock.index == prevBlock.index+1
+            if (not(correctHash and correctIndex)):
                 return False
         return True
 

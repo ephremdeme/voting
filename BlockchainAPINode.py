@@ -19,14 +19,22 @@ node_address = str(uuid4()).replace('-', '')
 
 currentNodeURl = "http://localhost:" + str(PORT)
 # Creating a Blockchain
-blockchain = Blockchain()
-
+blockchain = Blockchain(PORT)
+blockchain.readChain()
 @app.route("/", methods = ['GET'])
 def home():
     return jsonify({'chain' : blockchain.serialize_chain(), 
     'pendingTransaction':  [e.serialize() for e in blockchain.pendingTransaction],
     'networkNode' : blockchain.networkNodes})
     # return jsonify({'chain':blockchain.chain, 'networkNodes' : blockchain.networkNodes, 'pendingtransaction' : blockchain.pendingTransaction}), 200
+
+@app.route('/get-blockchain', methods = ['GET'])
+def test():
+    return jsonify(
+        {
+            'chain' : jsonpickle.encode(blockchain.chain), 
+            'pendingTransaction':  jsonpickle.encode(blockchain.pendingTransaction)
+        })
 
 @app.route('/transaction', methods = ['POST'])
 def addTransaction():
@@ -77,7 +85,10 @@ def mine():
     # generating hash for the block and mining
     blockHash = blockchain.hashBlock(blockData, nonce)
     block = blockchain.createBlock(nonce, lastBlock.hash, blockHash )
+    blockchain.storeBlock(block)
     block = jsonpickle.encode(block)
+    
+
     for node in blockchain.networkNodes:
         log(1, "the block is transmitted to" + str(node))
         requests.post(node + '/receive-new-block', json={'newBlock' : block})
@@ -92,6 +103,7 @@ def mine():
     transaction = blockchain.createNewTransaction(transaction['amount'], transaction['sender'], transaction['receiver'])
     
     blockchain.addToPendingTransaction(transaction)
+    transaction = jsonpickle.encode(transaction)
 
     for node in blockchain.networkNodes:
         requests.post( node + '/transaction', json=transaction)
@@ -122,6 +134,7 @@ def receiveNewBlock():
     if(correctHash and correctIndex and has_valid_tx):
         blockchain.chain.append(newBlock)
         blockchain.pendingTransaction = []
+        blockchain.storeBlock(newBlock)
         return jsonify({
 			'note': 'New block received and accepted.',
 			'newBlock': [e.serialize() for e in newBlock.transaction]
@@ -190,9 +203,11 @@ def consensus():
     bestChain = []
     newPendingTransaction = []
     for node in blockchain.networkNodes:
-        r= requests.get(node + '/')
+        r= requests.get(node + '/get-blockchain')
         allBlcockchain.append(r.json())
     for block in allBlcockchain:
+        block['chain'] = jsonpickle.decode(block['chain'])
+        block['pendingTransaction'] = jsonpickle.decode(block['pendingTransaction'])
         if True:
             if(len(block['chain'])>maxLen):
                 maxLen = len(block['chain'])
@@ -202,9 +217,20 @@ def consensus():
     if  blockchain.isChainValid(bestChain) and len(bestChain):
         blockchain.chain = bestChain
         blockchain.pendingTransaction = newPendingTransaction
-        return jsonify({'message' : 'This chain has been replaced ','chain' : bestChain})
+        blockchain.replace(bestChain)
+        return jsonify({'message' : 'This chain has been replaced ','chain' :[e.serialize() for e in bestChain]})
     else:
-        return jsonify({'all' : bestChain, 'best': blockchain.isChainValid(bestChain)})    
+        return jsonify({'message' : 'this chain is not replaced ', 'best': [e.serialize() for e in bestChain]})    
+
+
+@app.route('/connect-nodes', methods = ['GET'])
+def connectNode():
+    for i in range(5):
+        data = {
+            "newNode":  "http://localhost:500" + str(i+1) 
+        }
+        requests.post(currentNodeURl +'/register-node/broadcast', json=data)
+    return jsonify({'network nodes' :blockchain.networkNodes}) 
     
 
 
