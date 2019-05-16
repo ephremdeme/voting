@@ -1,11 +1,9 @@
-from datetime import datetime
-from uuid import uuid4
 import json
 import jsonpickle
 import hashlib
-from Transaction import Transaction
 from FileUtil import FileUtil
 from Block import Block
+
 
 class Blockchain:
 
@@ -13,86 +11,82 @@ class Blockchain:
         self.chain = []
         self.pendingTransaction = []
         self.networkNodes = []
-        self.file = FileUtil('json/' +str(PORT) +'.json')
-        self.file.storeGenesisBlock(self.createBlock(1, '0', '0'))
+        self.file = FileUtil('json/' + str(PORT) + '.json')
+        self.file.store_genesis_block(self.create_block(1, '0', '0'))
 
-    def createBlock(self, nonce , prevHash, blockHash):
-        block = Block(nonce, prevHash, blockHash, len(self.chain)+1, self.pendingTransaction)
+    def create_block(self, nonce, prev_hash, block_hash):
+        block = Block(nonce, prev_hash, block_hash, len(self.chain) + 1, self.pendingTransaction)
         self.pendingTransaction = []
 
         self.chain.append(block)
 
         return block
 
-    def getLastBlock(self):
+    def get_last_block(self):
         return self.chain[-1]
-    
-    def storeBlock(self, block):
+
+    def store_block(self, block):
         self.file.write(block)
-    
-    def readChain(self):
+
+    def read_chain(self):
         self.chain = self.file.read()
 
     def replace(self, bestChain):
         self.file.replace(bestChain)
 
-
-    def createNewTransaction(self, amount, from_address, to_address):
-        newTransaction= Transaction(from_address, to_address, amount)
-        return newTransaction
-
-    def addToPendingTransaction(self, transaction):
-        if(not transaction.is_valid()):
+    def add_to_pending_transaction(self, transaction):
+        if not transaction.is_valid():
             raise Exception('Inavlid Transaction')
         self.pendingTransaction.append(transaction)
-        return self.getLastBlock().index + 1
+        return self.get_last_block().index + 1
 
-    def hashBlock(self, blockData, nonce ):
-        blockData['nonce'] = nonce
-        encoded_block = json.dumps(blockData, sort_keys = True).encode()
+    @staticmethod
+    def hash_block(block_data, nonce):
+        block_data['nonce'] = nonce
+        encoded_block = json.dumps(block_data, sort_keys=True).encode()
         return hashlib.sha256(encoded_block).hexdigest()
 
-    def proofOfWork(self, blockData ):
+    def proof_of_work(self, block_data):
         nonce = 0
-        hash =  self.hashBlock(blockData, nonce)
-        while hash[:4]!='0000':
-            nonce+=1
-            hash =  self.hashBlock(blockData, nonce)
+        block_hash = self.hash_block(block_data, nonce)
+        while block_hash[:4] != '0000':
+            nonce += 1
+            block_hash = self.hash_block(block_data, nonce)
 
         return nonce
-    
-    def isChainValid(self, blockchain):
+
+    def is_chain_valid(self, blockchain):
         for i in range(1, len(blockchain)):
-            currentBlock = blockchain[i]
-            prevBlock = blockchain[i-1]
-            if(not self.has_valid_transaction(currentBlock)):
+            current_block = blockchain[i]
+            prev_block = blockchain[i - 1]
+            if not self.has_valid_transaction(current_block):
                 return False
 
-            blockData = {
-                'transactions' : jsonpickle.encode(currentBlock.transaction),
-                'index'        : prevBlock.index + 1
-                }
-            blockHash = self.hashBlock(blockData, currentBlock.nonce)
-            if(blockHash[:4] != '0000'):
+            block_data = {
+                'transactions': jsonpickle.encode(current_block.transaction),
+                'index': prev_block.index + 1
+            }
+            block_hash = self.hash_block(block_data, current_block.nonce)
+            if block_hash[:4] != '0000':
                 return False
-            correctHash = currentBlock.previousBlockHash == prevBlock.hash
-            correctIndex = currentBlock.index == prevBlock.index+1
-            if (not(correctHash and correctIndex)):
+            correct_hash = current_block.previousBlockHash == prev_block.hash
+            correct_index = current_block.index == prev_block.index + 1
+            if not (correct_hash and correct_index):
                 return False
         return True
 
-    def has_valid_transaction(self, block):
-        if(block.isBlockValid()):
+    @staticmethod
+    def has_valid_transaction( block):
+        if block.is_block_valid():
             return True
-        else :
+        else:
             return False
 
-    def addNode(self, address):
+    def add_node(self, address):
         self.networkNodes.append(address)
-    
+
     def serialize_chain(self):
-        display  = []
+        display = []
         for block in self.chain:
             display.append(block.serialize())
         return display
-            
