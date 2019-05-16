@@ -1,45 +1,41 @@
 from fastecdsa import keys, curve, ecdsa
-
 from hashlib import sha256
-import hashlib
-import json
 from uuid import uuid4
 
 
-class Transaction :
+class Transaction:
     def __init__(self, from_address, to_address, amount):
         self.from_address = from_address
         self.to_address = to_address
         self.amount = amount
         self.id = str(uuid4()).replace('-', '')
         self.signature = None
-        
+
     def calculate_hash(self):
-        return sha256((str(self.from_address)  + str(self.to_address)  + str(self.amount) +self.id).encode()).hexdigest()
+        return sha256((str(self.from_address) + str(self.to_address) + str(self.amount) + self.id).encode()).hexdigest()
 
     def sign_tx(self, priv_key):
-        hashTx = self.calculate_hash()
-        self.signature = ecdsa.sign(hashTx, priv_key, hashfunc=sha256)
-        
-    
+        hash_tx = self.calculate_hash()
+        self.signature = ecdsa.sign(hash_tx, priv_key, hashfunc=sha256)
+
     def is_valid(self):
-        if(self.signature == None):
+        if self.signature is None:
             return True
-        if(len(self.signature) == 0 and self.to_address==None):
+        if len(self.signature) == 0 and self.to_address is None:
             return False
-        hashTx = self.calculate_hash()
-        pubkey = keys.get_public_keys_from_sig(self.signature, hashTx, curve=curve.P256,hashfunc=sha256 )
-        valid = ecdsa.verify(self.signature, hashTx, pubkey[0], hashfunc=sha256)
+        hash_tx = self.calculate_hash()
+        pubkey = keys.get_public_keys_from_sig(self.signature, hash_tx, curve=curve.P256, hashfunc=sha256)
+        valid = ecdsa.verify(self.signature, hash_tx, pubkey[0], hashfunc=sha256)
         return valid
 
     def serialize(self):
         return {
-            'Tx_ID'        : self.id,
-            'from_address' : self.from_address,
-            'to_address'   : self.to_address,
-            'amount'       : self.amount
+            'Tx_ID': self.id,
+            'from_address': self.from_address,
+            'to_address': self.to_address,
+            'amount': self.amount
         }
-    
+
 # private_key = keys.gen_private_key(curve.P256)
 
 # public_key  = keys.get_public_key(private_key, curve.P256)
