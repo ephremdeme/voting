@@ -6,7 +6,7 @@ from sys import argv
 from logging import log
 from fastecdsa import keys, curve
 import jsonpickle
-from wallet import Wallet
+from client.wallet import Wallet
 
 private_key = keys.gen_private_key(curve.P256)
 public_key = keys.get_public_key(private_key, curve.P256)
@@ -21,8 +21,7 @@ currentNodeURl = "http://localhost:" + str(PORT)
 # Creating a Blockchain
 blockchain = Blockchain(PORT)
 blockchain.read_chain()
-wallet = Wallet()
-minnerWallet = Wallet()
+miner_wallet = Wallet()
 
 
 @app.route("/", methods=['GET'])
@@ -59,7 +58,7 @@ def add_transaction():
 @app.route('/transaction/broadcast', methods=['POST'])
 def transaction_broadcast():
     json = request.get_json()
-    transaction = wallet.create_transaction(json['receiver'], json['amount'])
+    transaction = jsonpickle.decode(json)
     try:
         blockchain.add_to_pending_transaction(transaction)
     except Exception:
@@ -73,7 +72,7 @@ def transaction_broadcast():
         requests.post(node + '/transaction', json=transaction, timeout=2)
 
     return jsonify({'note': 'Transaction created and broadcast successfully.',
-                    'pendingTransaction': [e.serialize() for e in blockchain.pendingTransaction]})
+                    'pendingTransaction': [e.serialize() for e in blockchain.pendingTransaction]}), 200
 
 
 @app.route('/mine', methods=['GET'])
@@ -99,10 +98,10 @@ def mine():
     log(1, "minning fee is being transmitted")
     transaction = {
         "sender": None,
-        "receiver": minnerWallet.address,
+        "receiver": node_address,
         "amount": 12.5
     }
-    transaction = wallet.create_transaction(transaction['receiver'], transaction['amount'])
+    transaction = miner_wallet.create_transaction(transaction['receiver'], transaction['amount'])
 
     blockchain.add_to_pending_transaction(transaction)
     transaction = jsonpickle.encode(transaction)
@@ -207,6 +206,7 @@ def consensus():
     for node in blockchain.networkNodes:
         r = requests.get(node + '/get-blockchain')
         all_blockchain.append(r.json())
+    
     for block in all_blockchain:
         block['chain'] = jsonpickle.decode(block['chain'])
         block['pendingTransaction'] = jsonpickle.decode(block['pendingTransaction'])
@@ -229,7 +229,7 @@ def consensus():
 def connect_node():
     for i in range(5):
         data = {
-            "newNode": "http://localhost:500" + str(i + 1)
+            "new_node": "http://localhost:500" + str(i + 1)
         }
         requests.post(currentNodeURl + '/register-node/broadcast', json=data)
     return jsonify({'network nodes': blockchain.networkNodes})
@@ -237,7 +237,7 @@ def connect_node():
 
 @app.route('/vote', methods=['GET'])
 def vote():
-    return jsonify({'vote count': wallet.calculate_vote(blockchain.chain)})
+    return jsonify({'vote count': blockchain.calculate_vote(blockchain.chain)})
 
 
 app.run(host='0.0.0.0', port=int(PORT))

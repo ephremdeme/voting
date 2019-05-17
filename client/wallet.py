@@ -1,9 +1,11 @@
 from Transaction import Transaction
 from fastecdsa import keys, curve, ecdsa
 import hashlib
+import requests
+import jsonpickle
 
 
-class Wallet():
+class Wallet:
     def __init__(self):
         self.privateKey = keys.gen_private_key(curve.P256)
         self.publicKey = keys.get_public_key(self.privateKey, curve.P256)
@@ -17,24 +19,16 @@ class Wallet():
 
     def create_transaction(self, receiver, amount):
         transaction = Transaction(self.address, receiver, amount)
-        self.vote += amount
         transaction.sign_tx(self.privateKey)
-        return transaction
-
-    @staticmethod
-    def calculate_vote(chain):
-        vote = 0
-        for block in chain:
-            for tx in block.transaction:
-                if tx.to_address == '00f23132c7bc626122a6878bbb0b916e5a2bbc26':
-                    vote += 1
-        return vote
+        transaction = jsonpickle.encode(transaction)
+        r = requests.post('http://localhost:5000/transaction/broadcast', json=transaction)
+        return r.status_code
 
 # wallet =Wallet()
 # wallet1 = Wallet()
-# tx= wallet.createTransaction(wallet1.address, 12)
-# tx1 = wallet1.createTransaction(wallet.address, 13)
-# tx2 =wallet1.createTransaction(wallet.address, 44)
-# print(tx.is_valid())
-# print(tx.is_valid())
+# tx= wallet.create_transaction(wallet1.address, 12)
+# tx1 = wallet1.create_transaction(wallet.address, 13)
+# tx2 =wallet1.create_transaction(wallet.address, 44)
+# # print(tx.is_valid())
+# # print(tx.is_valid())
 # print(wallet1.vote, wallet.vote)

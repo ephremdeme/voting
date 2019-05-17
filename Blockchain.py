@@ -90,3 +90,12 @@ class Blockchain:
         for block in self.chain:
             display.append(block.serialize())
         return display
+        
+    @staticmethod
+    def calculate_vote(chain):
+        vote = 0
+        for block in chain:
+            for tx in block.transaction:
+                if tx.to_address == '00f23132c7bc626122a6878bbb0b916e5a2bbc26':
+                    vote += 1
+        return vote
