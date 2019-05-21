@@ -23,6 +23,8 @@ blockchain = Blockchain(PORT)
 blockchain.read_chain()
 miner_wallet = Wallet()
 
+app.debug = True
+
 
 @app.route("/", methods=['GET'])
 def home():
@@ -92,29 +94,29 @@ def mine():
     block = jsonpickle.encode(block)
 
     for node in blockchain.networkNodes:
-        log(1, "the block is transmitted to" + str(node))
-        requests.post(node + '/receive-new-block', json={'newBlock': block})
+        print(1, "the block is transmitted to" + str(node))
+        requests.post(node + '/receive-new-block', json={'new_block': block})
 
-    log(1, "minning fee is being transmitted")
-    transaction = {
-        "sender": None,
-        "receiver": node_address,
-        "amount": 12.5
-    }
-    transaction = miner_wallet.create_transaction(transaction['receiver'], transaction['amount'])
-
-    blockchain.add_to_pending_transaction(transaction)
-    transaction = jsonpickle.encode(transaction)
-
-    for node in blockchain.networkNodes:
-        requests.post(node + '/transaction', json=transaction)
+    # print(1, "minning fee is being transmitted")
+    # transaction = {
+    #     "sender": None,
+    #     "receiver": node_address,
+    #     "amount": 12.5
+    # }
+    # transaction = miner_wallet.create_transaction(transaction['receiver'], transaction['amount'])
+    #
+    # blockchain.add_to_pending_transaction(transaction)
+    # transaction = jsonpickle.encode(transaction)
+    #
+    # for node in blockchain.networkNodes:
+    #     requests.post(node + '/transaction', json=transaction)
 
     # r=requests.post( currentNodeURl + '/transaction/broadcast', json=transaction)
     block = jsonpickle.decode(block)
     response = {'message': 'Congratulations, you just mined a block!',
                 'block': block.serialize()}
 
-    log(1, "minning completed successfully")
+    print(1, "minning completed successfully")
     return jsonify(response), 200
 
 
@@ -123,26 +125,17 @@ def receive_new_block():
     json = request.get_json()
     new_block = json['new_block']
     new_block = jsonpickle.decode(new_block)
-    last_block = blockchain.get_last_block()
-
-    # checking weather hash is maching and has valid transaction
-    # befor accepting a new block
-
-    correct_hash = last_block.hash == new_block.previousBlockHash
-    correct_index = last_block.index + 1 == new_block.index
-    has_valid_tx = blockchain.has_valid_transaction(new_block)
-    if correct_hash and correct_index and has_valid_tx:
-        blockchain.chain.append(new_block)
-        blockchain.pendingTransaction = []
-        blockchain.store_block(new_block)
+    if blockchain.receive_block(new_block):
+        for node in blockchain.networkNodes:
+            new_block = jsonpickle.encode(new_block)
+            print(1, "the block is transmitted to" + str(node))
+            requests.post(node + '/receive-new-block', json={'new_block': new_block})
         return jsonify({
-            'note': 'New block received and accepted.',
-            'new_block': [e.serialize() for e in new_block.transaction]
+            'note': 'New block received and accepted.'
         })
     else:
         return jsonify({
-            'note': 'New block received and rejected.',
-            'new_block': [e.serialize() for e in new_block.transaction]
+            'note': 'New block received and rejected.'
         })
 
 
@@ -206,7 +199,7 @@ def consensus():
     for node in blockchain.networkNodes:
         r = requests.get(node + '/get-blockchain')
         all_blockchain.append(r.json())
-    
+
     for block in all_blockchain:
         block['chain'] = jsonpickle.decode(block['chain'])
         block['pendingTransaction'] = jsonpickle.decode(block['pendingTransaction'])
