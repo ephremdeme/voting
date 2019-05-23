@@ -3,10 +3,7 @@ import requests
 from uuid import uuid4
 from Blockchain import Blockchain
 from sys import argv
-from logging import log
-from fastecdsa import keys, curve
 import jsonpickle
-from client.wallet import Wallet
 
 # Creating a Web App
 app = Flask(__name__)

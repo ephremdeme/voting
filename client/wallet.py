@@ -1,5 +1,5 @@
 from Transaction import Transaction
-from fastecdsa import keys, curve, ecdsa
+from fastecdsa import keys, curve
 import hashlib
 import requests
 import pyrebase
