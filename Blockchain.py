@@ -26,7 +26,11 @@ class Blockchain:
         return self.chain[-1]
 
     def receive_block(self, other):
+        if type(other) == str:
+            other = jsonpickle.decode(other)
+
         last_block = self.get_last_block()
+        print(other)
         if last_block == other:
             return False
 
@@ -58,9 +62,11 @@ class Blockchain:
 
     def add_to_pending_transaction(self, transaction):
         if not transaction.is_valid():
-            raise Exception('Inavlid Transaction')
+            return False
+        if self.transaction_exist(transaction.id):
+            return False
         self.pendingTransaction.append(transaction)
-        return self.get_last_block().index + 1
+        return True
 
     @staticmethod
     def hash_block(block_data, nonce):
@@ -97,18 +103,11 @@ class Blockchain:
                 return False
         return True
 
-    @staticmethod
-    def has_valid_transaction(block):
-        if block.is_block_valid():
-            return True
-        else:
-            return False
-
     def add_node(self, address):
         self.networkNodes.append(address)
 
     def serialize_chain(self):
-        if len(self.chain)==0:
+        if len(self.chain) == 0:
             return
         display = []
         for block in self.chain:
@@ -123,3 +122,22 @@ class Blockchain:
                 if tx.to_address == '00f23132c7bc626122a6878bbb0b916e5a2bbc26':
                     vote += 1
         return vote
+
+    @staticmethod
+    def has_valid_transaction(block):
+        if block.is_block_valid():
+            return True
+        else:
+            return False
+
+    def transaction_exist(self, tx_id):
+        for tx in self.pendingTransaction:
+            if tx.id == tx_id:
+                return True
+
+        for block in self.chain:
+            for tx in block.transaction:
+                if tx.id == tx_id:
+                    return True
+
+        return False

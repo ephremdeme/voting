@@ -1,16 +1,8 @@
 # /usr/bin/python
 
-#    Name                ID
-# 1) Amanuel Asfaw       R/0142/08
-# 2) Bereket Asfaw       R/0242/08
-# 3) Ephrem  Demelash    R/0427/08
-# 4) Kidist  Alemayehu   R/0709/08
-# 5) Girma   Moges       R/0550/08
-
 from tkinter import StringVar, Label, Entry, Button, Tk, IntVar
 from tkinter import ttk
-import pyrebase
-import jsonpickle
+
 from client.wallet import Wallet
 
 root = Tk()

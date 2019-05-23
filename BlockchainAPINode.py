@@ -8,9 +8,6 @@ from fastecdsa import keys, curve
 import jsonpickle
 from client.wallet import Wallet
 
-private_key = keys.gen_private_key(curve.P256)
-public_key = keys.get_public_key(private_key, curve.P256)
-
 # Creating a Web App
 app = Flask(__name__)
 PORT = argv[1]
@@ -21,7 +18,6 @@ currentNodeURl = "http://localhost:" + str(PORT)
 # Creating a Blockchain
 blockchain = Blockchain(PORT)
 blockchain.read_chain()
-miner_wallet = Wallet()
 
 app.debug = True
 
@@ -42,36 +38,19 @@ def get_blockchain():
         })
 
 
-@app.route('/transaction', methods=['POST'])
-def add_transaction():
-    json = request.get_json()
-    try:
-        json = jsonpickle.decode(json)
-        index = blockchain.add_to_pending_transaction(json)
-
-    except Exception:
-        response = {'message': 'This transaction is invalid will not be added to Block '}
-        return response, 200
-
-    response = {'message': 'This transaction will be added to Block ' + str(index)}
-    return jsonify(response), 201
-
-
 @app.route('/transaction/broadcast', methods=['POST'])
 def transaction_broadcast():
     json = request.get_json()
     transaction = jsonpickle.decode(json)
-    try:
-        blockchain.add_to_pending_transaction(transaction)
-    except Exception:
+    if blockchain.add_to_pending_transaction(transaction):
+        transaction = jsonpickle.encode(transaction)
+    else:
         response = {'message': 'This transaction is invalid will not be added to Block '}
         return jsonify(response), 500
 
-    if len(blockchain.networkNodes) == 0:
-        return 'empty'
-    transaction = jsonpickle.encode(transaction)
-    for node in blockchain.networkNodes:
-        requests.post(node + '/transaction', json=transaction, timeout=2)
+    if len(blockchain.networkNodes) is not 0:
+        for node in blockchain.networkNodes:
+            requests.post(node + '/transaction/broadcast', json=transaction, timeout=2)
 
     return jsonify({'note': 'Transaction created and broadcast successfully.',
                     'pendingTransaction': [e.serialize() for e in blockchain.pendingTransaction]}), 200
@@ -126,8 +105,8 @@ def receive_new_block():
     new_block = json['new_block']
     new_block = jsonpickle.decode(new_block)
     if blockchain.receive_block(new_block):
+        new_block = jsonpickle.encode(new_block)
         for node in blockchain.networkNodes:
-            new_block = jsonpickle.encode(new_block)
             print(1, "the block is transmitted to" + str(node))
             requests.post(node + '/receive-new-block', json={'new_block': new_block})
         return jsonify({
@@ -162,7 +141,7 @@ def register_broadcast_node():
 
     response = {'message': 'All the nodes are now connected. The Blockchain now contains the following nodes:',
                 'total_nodes': list(blockchain.networkNodes)}
-    return jsonify(response), 201
+    return jsonify(response), 200
 
 
 @app.route('/register-node', methods=['POST'])
