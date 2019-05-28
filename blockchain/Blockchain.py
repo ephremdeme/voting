@@ -1,8 +1,8 @@
 import json
 import jsonpickle
 import hashlib
-from FileUtil import FileUtil
-from Block import Block
+from util.FileUtil import FileUtil
+from blockchain.Block import Block
 
 
 class Blockchain:
@@ -26,9 +26,6 @@ class Blockchain:
         return self.chain[-1]
 
     def receive_block(self, other):
-        if type(other) == str:
-            other = jsonpickle.decode(other)
-
         last_block = self.get_last_block()
         print(other)
         if last_block == other:

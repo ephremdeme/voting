@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 import requests
 from uuid import uuid4
-from Blockchain import Blockchain
+from blockchain.Blockchain import Blockchain
 from sys import argv
 import jsonpickle
 
@@ -207,6 +207,13 @@ def connect_node():
 @app.route('/vote', methods=['GET'])
 def vote():
     return jsonify({'vote count': blockchain.calculate_vote(blockchain.chain)})
+
+
+@app.route('/test', methods=['GET'])
+def test():
+    for i in range(1000):
+        requests.get(currentNodeURl + '/consensus')
+    return jsonify({'note': "test succesfull"})
 
 
 app.run(host='0.0.0.0', port=int(PORT))
