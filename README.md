@@ -1,8 +1,8 @@
 # Blockchain Based Voting
-It is python based implementation of blockchain technology to used for e-Voting. 
-By considering each vote as transaction to be added pending_transaction, which 
-is ready to mined and included in **Block**. And then the newly created block is added to the blockchain and broadcast
-to the nodes of  the network.
+It is python based implementation of blockchain technology to be used for e-Voting. 
+By considering each vote as transaction to be added to pending_transaction, which 
+is ready to be mined and included in a **Block**. And then the newly created block is added to the blockchain and broadcast
+to all the nodes.
 <!Configuration
 1. List of Voters: This list contains all eligible voters for the given election. 
 2. List of Candidates: This list outlines the individual subjects on which voters
