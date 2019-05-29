@@ -25,6 +25,9 @@ class Blockchain:
     def get_last_block(self):
         return self.chain[-1]
 
+    def find_block_by_id(self, block_id):
+        return self.chain[block_id - 1]
+
     def receive_block(self, other):
         last_block = self.get_last_block()
         print(other)
@@ -138,3 +141,15 @@ class Blockchain:
                     return True
 
         return False
+
+    def find_tx_by_id(self, tx_id):
+        for tx in self.pendingTransaction:
+            if tx.id == tx_id:
+                return tx.serialize()
+
+        for block in self.chain:
+            for tx in block.transaction:
+                if tx.id == tx_id:
+                    return tx.serialize()
+
+        return str(tx_id) + "not found"

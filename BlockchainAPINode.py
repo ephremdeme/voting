@@ -53,6 +53,16 @@ def transaction_broadcast():
                     'pendingTransaction': [e.serialize() for e in blockchain.pendingTransaction]}), 200
 
 
+@app.route('/block/<int:block_id>', methods=['GET'])
+def block_id(block_id):
+    return jsonify({'block': blockchain.find_block_by_id(block_id).serialize()})
+
+
+@app.route('/transaction/<tx_id>', methods=['GET'])
+def transaction_id(tx_id):
+    return jsonify({'tx': blockchain.find_tx_by_id(tx_id)})
+
+
 @app.route('/mine', methods=['GET'])
 def mine():
     last_block = blockchain.get_last_block()
