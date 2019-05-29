@@ -1,4 +1,4 @@
-#Blockchain Based Voting
+# Blockchain Based Voting
 It is python based implementation of blockchain technology to used for e-Voting. 
 By considering each vote as transaction to be added pending_transaction, which 
 is ready to mined and included in **Block**. And then the newly created block is added to the blockchain and broadcast
@@ -12,18 +12,18 @@ select in an STV.
 4. Election Start/End Times: These values specify the time frame in which eligible voters are
 allowed to cast their vote.!>
 
-#Features
-####The blockchain :
+# Features
+#### The blockchain :
 
 * Possibility of adding multiple nodes to the blockchain
 * Proof of Work (PoW)
 * Simple conflict resolution between nodes
 * Transactions with ecdsa signature verification
-####The blockchain client has the following features:
+#### The blockchain client has the following features:
 * Desktop based GUI app
 * Wallets generation using Public/Private key encryption (based on ecdsa)
 * Generation of transactions with ecdsa asymmetric encryption
-####The blockchain API server for miners
+#### The blockchain API server for miners
 * Block explorer
 * Transaction and Block verification & Broadcasting
 * Block mining
@@ -34,15 +34,15 @@ allowed to cast their vote.!>
 ```text
 git clone https://github.com/ephremdeme/voting.git
 ```
-* simply `cd voting` and install all the dependencies from requirement.txt
+* simply ` cd voting` and install all the dependencies from requirement.txt
 ```text
 pip install -r requirements.txt 
 ```
 * on linux terminal run `./run.sh`, this will apen a 6 tab terminal for 6 network nodes 
 * or add each node like `python BlockchainAPINode.py 5000`
 * to add peer node, open postman POST request `localhost:5000/register-node/broadcast`
-and send json `{ "new_node":  "http://localhost:5002"}`
-* to start the blockchain client, go to `cd client` and execute: `python clientGUI.py`
+and send json ` { "new_node":  "http://localhost:5002"} `
+* to start the blockchain client, go to `cd client` and execute: ` python clientGUI.py`
 * finally open your browser and go to `localhost:5000` 
 
 
