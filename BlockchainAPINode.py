@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 import requests
 from uuid import uuid4
-from Blockchain import Blockchain
+from blockchain.Blockchain import Blockchain
 from sys import argv
 import jsonpickle
 
@@ -51,6 +51,16 @@ def transaction_broadcast():
 
     return jsonify({'note': 'Transaction created and broadcast successfully.',
                     'pendingTransaction': [e.serialize() for e in blockchain.pendingTransaction]}), 200
+
+
+@app.route('/block/<int:block_id>', methods=['GET'])
+def block_id(block_id):
+    return jsonify({'block': blockchain.find_block_by_id(block_id).serialize()})
+
+
+@app.route('/transaction/<tx_id>', methods=['GET'])
+def transaction_id(tx_id):
+    return jsonify({'tx': blockchain.find_tx_by_id(tx_id)})
 
 
 @app.route('/mine', methods=['GET'])
@@ -207,6 +217,13 @@ def connect_node():
 @app.route('/vote', methods=['GET'])
 def vote():
     return jsonify({'vote count': blockchain.calculate_vote(blockchain.chain)})
+
+
+@app.route('/test', methods=['GET'])
+def test():
+    for i in range(1000):
+        requests.get(currentNodeURl + '/consensus')
+    return jsonify({'note': "test succesfull"})
 
 
 app.run(host='0.0.0.0', port=int(PORT))
