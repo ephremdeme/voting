@@ -1,7 +1,8 @@
 import json
 import jsonpickle
 import hashlib
-from util.FileUtil import FileUtil
+
+from util.DBUtil import DBUtil
 from blockchain.Block import Block
 
 
@@ -10,12 +11,13 @@ class Blockchain:
     def __init__(self, PORT):
         self.chain = []
         self.pendingTransaction = []
-        self.networkNodes = []
-        self.file = FileUtil('json/' + str(PORT) + '.json')
-        self.file.store_genesis_block(Block(1, '0000x', '0000x', 1, []))
+        self.db = DBUtil('db/' + PORT)
+        self.networkNodes = self.db.get_network_node()
+        self.db.store_genesis_block(Block(1, ' ', '00000', 1, []))
 
     def create_block(self, nonce, prev_hash, block_hash):
-        block = Block(nonce, prev_hash, block_hash, len(self.chain) + 1, self.pendingTransaction)
+        block = Block(nonce, prev_hash, block_hash, self.count() + 1, self.pendingTransaction)
+        print(self.count(), "count")
         if block.is_block_valid():
             self.chain.append(block)
             self.pendingTransaction = []
@@ -25,13 +27,16 @@ class Blockchain:
     def get_last_block(self):
         return self.chain[-1]
 
+    def get_all_block(self):
+        return self.db.get_all_block()
+
     def find_block_by_id(self, block_id):
         return self.chain[block_id - 1]
 
     def receive_block(self, other):
         last_block = self.get_last_block()
-        print(other)
-        if last_block == other:
+
+        if last_block.__eq__(other):
             return False
 
         block_data = {
@@ -41,10 +46,10 @@ class Blockchain:
         block_hash = self.hash_block(block_data, other.nonce)
         if block_hash != other.hash:
             return False
-
         if other.is_block_valid():
             if last_block.index + 1 == other.index:
                 if last_block.hash == other.previousBlockHash:
+                    self.chain.pop(0)
                     self.chain.append(other)
                     self.pendingTransaction = []
                     self.store_block(other)
@@ -52,13 +57,30 @@ class Blockchain:
         return False
 
     def store_block(self, block):
-        self.file.write(block)
+        self.chain.pop(0)
+        self.db.store_block(block.index, block)
 
     def read_chain(self):
-        self.chain = self.file.read()
+        chain = self.db.get_block_range(self.count() - 10, self.count()+1)
+        if self.range_blockchain_check():
+            self.chain = chain
+
+    def range_blockchain_check(self):
+        i = 10
+        count = self.count()
+        valid = True
+        for i in range(i, count, 10):
+            chain = self.db.get_block_range(i - 10, i)
+            valid = valid and self.is_chain_valid(chain)
+            if not valid: return False
+        if i < count:
+            chain = self.db.get_block_range(i, count)
+            valid = valid and self.is_chain_valid(chain)
+            if not valid: return False
+        return True
 
     def replace(self, best_chain):
-        self.file.replace(best_chain)
+        self.db.replace_chain(best_chain)
 
     def add_to_pending_transaction(self, transaction):
         if not transaction.is_valid():
@@ -105,6 +127,7 @@ class Blockchain:
 
     def add_node(self, address):
         self.networkNodes.append(address)
+        self.db.store_network_node(self.networkNodes)
 
     def serialize_chain(self):
         if len(self.chain) == 0:
@@ -122,6 +145,9 @@ class Blockchain:
                 if tx.to_address == '00f23132c7bc626122a6878bbb0b916e5a2bbc26':
                     vote += 1
         return vote
+
+    def count(self):
+        return self.db.count()
 
     @staticmethod
     def has_valid_transaction(block):

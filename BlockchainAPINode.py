@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 import requests
 from uuid import uuid4
 from blockchain.Blockchain import Blockchain
@@ -16,11 +16,10 @@ currentNodeURl = "http://localhost:" + str(PORT)
 blockchain = Blockchain(PORT)
 blockchain.read_chain()
 
-app.debug = True
-
 
 @app.route("/", methods=['GET'])
 def home():
+    print(blockchain.count())
     return jsonify({'chain': blockchain.serialize_chain(),
                     'pendingTransaction': [e.serialize() for e in blockchain.pendingTransaction],
                     'networkNode': blockchain.networkNodes})
@@ -30,7 +29,7 @@ def home():
 def get_blockchain():
     return jsonify(
         {
-            'chain': jsonpickle.encode(blockchain.chain),
+            'chain': jsonpickle.encode(blockchain.get_all_block()),
             'pendingTransaction': jsonpickle.encode(blockchain.pendingTransaction)
         })
 
@@ -76,12 +75,18 @@ def mine():
     # generating hash for the block and mining
     block_hash = blockchain.hash_block(block_data, nonce)
     block = blockchain.create_block(nonce, last_block.hash, block_hash)
+    if not block:
+        return "Error"
     blockchain.store_block(block)
     block = jsonpickle.encode(block)
 
     for node in blockchain.networkNodes:
-        print(1, "the block is transmitted to" + str(node))
-        requests.post(node + '/receive-new-block', json={'new_block': block})
+        try:
+            requests.post(node + '/receive-new-block', json={'new_block': block})
+            print(1, "the block is transmitted to" + str(node))
+        except:
+            print("exception occurred ")
+            pass
 
     # print(1, "minning fee is being transmitted")
     # transaction = {
@@ -114,8 +119,11 @@ def receive_new_block():
     if blockchain.receive_block(new_block):
         new_block = jsonpickle.encode(new_block)
         for node in blockchain.networkNodes:
-            print(1, "the block is transmitted to" + str(node))
-            requests.post(node + '/receive-new-block', json={'new_block': new_block})
+            try:
+                requests.post(node + '/receive-new-block', json={'new_block': new_block})
+                print(1, "the block is transmitted to" + str(node))
+            except:
+                pass
         return jsonify({
             'note': 'New block received and accepted.'
         })
@@ -178,7 +186,7 @@ def register_bulk_nodes():
 @app.route('/consensus', methods=['GET'])
 def consensus():
     all_blockchain = []
-    current_chainlen = len(blockchain.chain)
+    current_chainlen = blockchain.count()
     max_len = current_chainlen
     best_chain = []
     new_pending_transaction = []
@@ -196,9 +204,10 @@ def consensus():
                 new_pending_transaction = block['pendingTransaction']
 
     if blockchain.is_chain_valid(best_chain) and len(best_chain):
-        blockchain.chain = best_chain
-        blockchain.pendingTransaction = new_pending_transaction
         blockchain.replace(best_chain)
+        print(len(best_chain == blockchain.count()))
+        blockchain.read_chain()
+        blockchain.pendingTransaction = new_pending_transaction
         return jsonify({'message': 'This chain has been replaced ', 'chain': [e.serialize() for e in best_chain]})
     else:
         return jsonify({'message': 'this chain is not replaced ', 'best': [e.serialize() for e in best_chain]})
@@ -218,12 +227,6 @@ def connect_node():
 def vote():
     return jsonify({'vote count': blockchain.calculate_vote(blockchain.chain)})
 
-
-@app.route('/test', methods=['GET'])
-def test():
-    for i in range(1000):
-        requests.get(currentNodeURl + '/consensus')
-    return jsonify({'note': "test succesfull"})
 
 
 app.run(host='0.0.0.0', port=int(PORT))

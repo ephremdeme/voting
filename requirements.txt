@@ -1,5 +1,7 @@
+leveldb
 fastecdsa==1.7.3
 Pyrebase==3.0.27
 jsonpickle==1.1
 Flask==1.0.2
 requests==2.11.1
+plyvel

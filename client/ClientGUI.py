@@ -1,6 +1,6 @@
 # /usr/bin/python
 
-from tkinter import StringVar, Label, Entry, Button, Tk, IntVar
+from tkinter import *
 from tkinter import ttk
 
 from client.wallet import Wallet
@@ -41,7 +41,7 @@ wallet = Wallet()
 #     print(jsonpickle.loads(e.args[1])['error']['message'])
 
 
-def stem():
+def sent():
     status = wallet.create_transaction(address.get(), amount.get())
     if status == 200:
         ans.set("successfully sent")
@@ -60,13 +60,24 @@ amount_entry.pack()
 address_entry = Entry(mainframe, textvariable=address)
 address_entry.insert(0, "address")
 address_entry.pack()
+list_candidate = StringVar()
+list_candidate.set(('abebe', 'kebede', 'ayele'))
 
-stemm_btn = Button(mainframe, text="send", command=stem)
-stemm_btn.pack()
+
+def sayselected():
+    print(select.selection_get())
+
+
+select = Listbox(mainframe, listvariable=list_candidate)
+
+
+select.pack()
+sentm_btn = Button(mainframe, text="send", command=sent)
+sentm_btn.pack()
 
 answer = Label(mainframe, textvariable=ans)
 answer.pack()
 
-mainframe.configure(width=400, height=200)
+mainframe.configure(width=700, height=200)
 mainframe.pack()
 root.mainloop()
