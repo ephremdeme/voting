@@ -5,11 +5,50 @@ import plyvel
 class DBUtil:
 
     def __init__(self, db_name):
-        self.db_name = db_name
         self._db = plyvel.DB(db_name, create_if_missing=True, comparator=self.comparator,
                              comparator_name=b'CaseInsensitiveComparator')
         self._blockdb = self._db.prefixed_db(b'block')
+        self._votedb = self._db.prefixed_db(b'vote')
         self._count = self.block_count()
+
+    def store_sec_address(self, array, section):
+        section = str(section).encode()
+        secdb = self._db.prefixed_db(section)
+        with secdb.write_batch(transaction=True) as write:
+            for key, value in array:
+                key = str(key).encode()
+                value = str(value).encode()
+                write.put(key, value)
+
+    def get_sec_address(self, section):
+        section = str(section).encode()
+        secdb = self._db.prefixed_db(section)
+        value = []
+        with secdb.iterator() as it:
+            for kv in it:
+                value.append(kv)
+        return value
+
+    def store_sec_candidate(self, array, section):
+        section = (str(section) + "cand").encode()
+        secdb = self._db.prefixed_db(section)
+        try:
+            with secdb.write_batch(transaction=True) as write:
+                for key, value in array:
+                    write.put(key.encode(), value.encode())
+            return True
+        except:
+            print("not completed successfully")
+            return False
+
+    def get_sec_candidate(self, section):
+        section = str(section).encode()
+        secdb = self._db.prefixed_db(section)
+        value = []
+        with secdb.iterator() as it:
+            for kv in it:
+                value.append(kv)
+        return value
 
     def store_block(self, index, value):
         key = str(index).encode()

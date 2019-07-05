@@ -11,6 +11,7 @@ address = StringVar()
 ans = StringVar()
 wallet = Wallet()
 
+
 # config = {
 #     'apiKey': "AIzaSyBQd1bnNrEpuXbbPH_c15M6kYwv79jU6Ew",
 #     'authDomain': "e-votingastu.firebaseapp.com",
@@ -60,18 +61,28 @@ amount_entry.pack()
 address_entry = Entry(mainframe, textvariable=address)
 address_entry.insert(0, "address")
 address_entry.pack()
-list_candidate = StringVar()
-list_candidate.set(('abebe', 'kebede', 'ayele'))
+
+cand_select = IntVar()
+cand_select.set(1)
+list_candidate = [
+    ("abebe", 1),
+    ("ayele", 2),
+    ("kebede", 3)
+]
 
 
-def sayselected():
-    print(select.selection_get())
+def ShowChoice():
+    print(cand_select.get())
 
 
-select = Listbox(mainframe, listvariable=list_candidate)
+for cand, value in enumerate(list_candidate):
+    Radiobutton(root,
+                text=value[0],
+                padx=20,
+                variable=cand_select,
+                command=ShowChoice,
+                value=cand).pack(anchor=W)
 
-
-select.pack()
 sentm_btn = Button(mainframe, text="send", command=sent)
 sentm_btn.pack()
 

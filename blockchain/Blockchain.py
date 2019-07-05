@@ -11,7 +11,7 @@ class Blockchain:
     def __init__(self, PORT):
         self.chain = []
         self.pendingTransaction = []
-        self.db = DBUtil('db/' + PORT)
+        self.db = DBUtil('db/' + str(PORT))
         self.networkNodes = self.db.get_network_node()
         self.db.store_genesis_block(Block(1, ' ', '00000', 1, []))
 
@@ -43,6 +43,8 @@ class Blockchain:
             'transactions': jsonpickle.encode(other.transaction),
             'index': last_block.index + 1
         }
+        if block_data['transactions'] is None:
+            return False
         block_hash = self.hash_block(block_data, other.nonce)
         if block_hash != other.hash:
             return False

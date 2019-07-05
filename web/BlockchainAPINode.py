@@ -1,13 +1,13 @@
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, send_file, Blueprint
 import requests
 from uuid import uuid4
 from blockchain.Blockchain import Blockchain
 from sys import argv
 import jsonpickle
 
+print(argv[3])
 # Creating a Web App
-app = Flask(__name__)
-PORT = argv[1]
+PORT = argv[3]
 # Creating an address for the node on Port 5000
 node_address = str(uuid4()).replace('-', '')
 
@@ -16,8 +16,10 @@ currentNodeURl = "http://localhost:" + str(PORT)
 blockchain = Blockchain(PORT)
 blockchain.read_chain()
 
+api = Blueprint('api', __name__)
 
-@app.route("/", methods=['GET'])
+
+@api.route("/blockchain", methods=['GET'])
 def home():
     print(blockchain.count())
     return jsonify({'chain': blockchain.serialize_chain(),
@@ -25,7 +27,7 @@ def home():
                     'networkNode': blockchain.networkNodes})
 
 
-@app.route('/get-blockchain', methods=['GET'])
+@api.route('/get-blockchain', methods=['GET'])
 def get_blockchain():
     return jsonify(
         {
@@ -34,10 +36,11 @@ def get_blockchain():
         })
 
 
-@app.route('/transaction/broadcast', methods=['POST'])
+@api.route('/transaction/broadcast', methods=['POST'])
 def transaction_broadcast():
     json = request.get_json()
     transaction = jsonpickle.decode(json)
+
     if blockchain.add_to_pending_transaction(transaction):
         transaction = jsonpickle.encode(transaction)
     else:
@@ -52,17 +55,17 @@ def transaction_broadcast():
                     'pendingTransaction': [e.serialize() for e in blockchain.pendingTransaction]}), 200
 
 
-@app.route('/block/<int:block_id>', methods=['GET'])
+@api.route('/block/<int:block_id>', methods=['GET'])
 def block_id(block_id):
     return jsonify({'block': blockchain.find_block_by_id(block_id).serialize()})
 
 
-@app.route('/transaction/<tx_id>', methods=['GET'])
+@api.route('/transaction/<tx_id>', methods=['GET'])
 def transaction_id(tx_id):
     return jsonify({'tx': blockchain.find_tx_by_id(tx_id)})
 
 
-@app.route('/mine', methods=['GET'])
+@api.route('/mine', methods=['GET'])
 def mine():
     last_block = blockchain.get_last_block()
     block_data = {
@@ -111,7 +114,7 @@ def mine():
     return jsonify(response), 200
 
 
-@app.route('/receive-new-block', methods=['POST'])
+@api.route('/receive-new-block', methods=['POST'])
 def receive_new_block():
     json = request.get_json()
     new_block = json['new_block']
@@ -133,7 +136,7 @@ def receive_new_block():
         })
 
 
-@app.route('/register-node/broadcast', methods=['POST'])
+@api.route('/register-node/broadcast', methods=['POST'])
 def register_broadcast_node():
     json = request.get_json()
     new_node = json['new_node']
@@ -159,7 +162,7 @@ def register_broadcast_node():
     return jsonify(response), 200
 
 
-@app.route('/register-node', methods=['POST'])
+@api.route('/register-node', methods=['POST'])
 def register_node():
     json = request.get_json()
     node = json['new_node']
@@ -172,7 +175,7 @@ def register_node():
         return jsonify({'note': 'New node registered successfully.'})
 
 
-@app.route('/register-bulk-nodes', methods=['POST'])
+@api.route('/register-bulk-nodes', methods=['POST'])
 def register_bulk_nodes():
     all_nodes = request.get_json()['all_network_nodes']
     for node in all_nodes:
@@ -183,7 +186,7 @@ def register_bulk_nodes():
     return jsonify({'note': "bulk registration successfull"}), 200
 
 
-@app.route('/consensus', methods=['GET'])
+@api.route('/consensus', methods=['GET'])
 def consensus():
     all_blockchain = []
     current_chainlen = blockchain.count()
@@ -213,7 +216,7 @@ def consensus():
         return jsonify({'message': 'this chain is not replaced ', 'best': [e.serialize() for e in best_chain]})
 
 
-@app.route('/connect-nodes', methods=['GET'])
+@api.route('/connect-nodes', methods=['GET'])
 def connect_node():
     for i in range(5):
         data = {
@@ -223,10 +226,10 @@ def connect_node():
     return jsonify({'network nodes': blockchain.networkNodes})
 
 
-@app.route('/vote', methods=['GET'])
+@api.route('/vote', methods=['GET'])
 def vote():
     return jsonify({'vote count': blockchain.calculate_vote(blockchain.chain)})
 
 
 
-app.run(host='0.0.0.0', port=int(PORT))
+

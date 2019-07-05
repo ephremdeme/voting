@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="alert alert-danger" role="alert">
+    {{ messages[0] }}. Go to <a href="{{ url_for('main.index') }}">Home page</a>.
+</div>
+{% endif %}
+{% endwith %}
+
+
+
+<form action="/create_election" method="POST" enctype="multipart/form-data" >
+
+    <div class="form-group">
+        <label for="yearselect">Year select</label>
+        <select name="year" class="form-control" id="yearselect">
+            <option value="" disabled selected>Select Year</option>
+            <option value=1>1 Year</option>
+            <option value=2>2 Year</option>
+            <option value=3>3 Year</option>
+            <option value=4>4 Year</option>
+            <option value=5>5 Year</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="schoolselect">School select</label>
+        <select name="school" class="form-control" id="schoolselect">
+            <option value="" disabled selected>Select school</option>
+
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="deptselect">Department select</label>
+        <select name="dept" class="form-control" id="deptselect">
+            <option value="" disabled selected>Select dept</option>
+        </select>
+    </div>
+
+
+    <div class="form-group">
+        <label for="excelinput">Voters list</label>
+        <input type="file" accept=".xlsx" name="file" class="form-control-file" id="excelinput">
+      </div>
+      
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+{% endblock %}
+
