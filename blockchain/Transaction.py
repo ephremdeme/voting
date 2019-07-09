@@ -32,7 +32,7 @@ class Transaction:
 
     def serialize(self):
         return {
-            'tx_id': self.id,
+            'id': self.id,
             'from_address': self.from_address,
             'to_address': self.to_address,
             'amount': self.amount

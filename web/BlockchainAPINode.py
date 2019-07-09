@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_file, Blueprint
+from flask import Flask, jsonify, request, send_file, Blueprint, render_template
 import requests
 from uuid import uuid4
 from blockchain.Blockchain import Blockchain
@@ -15,6 +15,8 @@ currentNodeURl = "http://localhost:" + str(PORT)
 # Creating a Blockchain
 blockchain = Blockchain(PORT)
 blockchain.read_chain()
+
+votedb = blockchain.db
 
 api = Blueprint('api', __name__)
 
@@ -56,13 +58,15 @@ def transaction_broadcast():
 
 
 @api.route('/block/<int:block_id>', methods=['GET'])
-def block_id(block_id):
-    return jsonify({'block': blockchain.find_block_by_id(block_id).serialize()})
+def block_by_id(block_id):
+    return jsonify({'block': blockchain.find_block_by_index(block_id).serialize()})
 
 
 @api.route('/transaction/<tx_id>', methods=['GET'])
 def transaction_id(tx_id):
-    return jsonify({'tx': blockchain.find_tx_by_id(tx_id)})
+    tx, block = blockchain.find_vote_by_id(tx_id)
+
+    return jsonify({'vote': tx.serialize(), 'block': block.serialize()})
 
 
 @api.route('/mine', methods=['GET'])
@@ -229,7 +233,3 @@ def connect_node():
 @api.route('/vote', methods=['GET'])
 def vote():
     return jsonify({'vote count': blockchain.calculate_vote(blockchain.chain)})
-
-
-
-

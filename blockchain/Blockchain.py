@@ -30,8 +30,11 @@ class Blockchain:
     def get_all_block(self):
         return self.db.get_all_block()
 
-    def find_block_by_id(self, block_id):
-        return self.chain[block_id - 1]
+    def find_block_by_hash(self, block_hash):
+        return self.db.get_block_index(block_hash)
+
+    def find_block_by_index(self, index):
+        return self.db.getblock(index)
 
     def receive_block(self, other):
         last_block = self.get_last_block()
@@ -63,7 +66,7 @@ class Blockchain:
         self.db.store_block(block.index, block)
 
     def read_chain(self):
-        chain = self.db.get_block_range(self.count() - 10, self.count()+1)
+        chain = self.db.get_block_range(self.count() - 10, self.count() + 1)
         if self.range_blockchain_check():
             self.chain = chain
 
@@ -170,14 +173,54 @@ class Blockchain:
 
         return False
 
-    def find_tx_by_id(self, tx_id):
+    def find_vote_by_id(self, tx_id):
         for tx in self.pendingTransaction:
             if tx.id == tx_id:
-                return tx.serialize()
+                return tx.serialize(), None
+        i = 10
+        count = self.count()
+        for i in range(i, count, 10):
+            chain = self.db.get_block_range(i - 10, i)
+            if self.get_transaction(chain, tx_id, "ID"):
+                return self.get_transaction(chain, tx_id, "ID")
 
-        for block in self.chain:
-            for tx in block.transaction:
-                if tx.id == tx_id:
-                    return tx.serialize()
-
+        if i < count:
+            chain = self.db.get_block_range(i, count)
+            if self.get_transaction(chain, tx_id, "ID"):
+                return self.get_transaction(chain, tx_id, "ID")
         return str(tx_id) + "not found"
+
+    def find_candidate_vote(self, cand):
+        vote_list = []
+        i = 10
+        count = self.count()
+        for i in range(i, count, 10):
+            chain = self.db.get_block_range(i - 10, i)
+            vote_list.extend(self.collect_vote(chain, to_address=cand))
+
+        if i < count:
+            chain = self.db.get_block_range(i, count)
+            vote_list.extend(self.collect_vote(chain, to_address=cand))
+
+        return vote_list
+
+    @staticmethod
+    def collect_vote(chain, to_address):
+        vote = []
+        for block in chain:
+            for tx in block.transaction:
+                if tx.to_address == to_address:
+                    vote.append(tx)
+        return vote
+
+    @staticmethod
+    def get_transaction(chain, tx_id, by):
+        for block in chain:
+            for tx in block.transaction:
+                if by == "ID":
+                    if tx.id == tx_id:
+                        return tx, block
+                else:
+                    if tx.to_address == tx_id:
+                        return tx, block
+        return False

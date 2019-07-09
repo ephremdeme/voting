@@ -10,12 +10,13 @@ def read_excel(fname):
     item = []
     array = []
     for i in range(1, r + 1):
-        for j in range(1, col + 1):
+        for j in range(2, col + 1):
             cell_value = data.cell(row=i, column=j)
             item.append(cell_value.value)
         item.append(generate_pin_password())
         array.append(tuple(item))
         item = []
+    print(array)
     return array
 
 
