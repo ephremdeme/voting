@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+                <h1 id="page-title">Block Explorer</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <form ng-submit="search(searchValue)">
+                <div class="form-group">
+                    <input type="text" id="key" class="form-control" ng-model="searchValue">
+                </div>
+                <div class="form-group">
+                    <select id="searchBy" class="form-control" ng-model="searchType">
+                        <option value="block">Block Index</option>
+                        <option value="transaction">Transaction ID</option>
+                        <option value="vote">Candidate</option>
+                    </select>
+                </div>
+                <button type="submit" id="search" class="btn btn-primary margin-auto btn-search">
+                    Search
+                </button>
+                <p id="sfound" class="no-data-text">
+                    No data found for search.
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <div class="row" >
+        <div class="col-md-10 offset-md-1">
+            <!-- 'display block' table -->
+            <h3 class="table-title" ng-if="block">Block</h3>
+            <table class="table table-borderless " id="blockTable">
+                
+            </table>
+
+            <h3 class="table-title" ng-if="transaction">Vote</h3>
+            <table class="table table-striped" id="voteTable" >
+
+            </table>
+        </div>
+    </div>
+
+
+
+
+{% endblock %}
