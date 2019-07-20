@@ -193,7 +193,7 @@ class Blockchain:
     def find_candidate_vote(self, cand):
         vote_list = []
         i = 10
-        count = self.count()
+        count = self.count() + 1
         for i in range(i, count, 10):
             chain = self.db.get_block_range(i - 10, i)
             vote_list.extend(self.collect_vote(chain, to_address=cand))
@@ -201,8 +201,17 @@ class Blockchain:
         if i < count:
             chain = self.db.get_block_range(i, count)
             vote_list.extend(self.collect_vote(chain, to_address=cand))
-
         return vote_list
+
+    def vote_result(self, sec_hash):
+        candidates = self.db.get_sec_candidate(sec_hash)
+        result = []
+        total = 0
+        for (key, cand) in candidates:
+            c = len(self.find_candidate_vote(key))
+            result.append((cand, c))
+            total += c
+        return result, total
 
     @staticmethod
     def collect_vote(chain, to_address):
@@ -210,7 +219,7 @@ class Blockchain:
         for block in chain:
             for tx in block.transaction:
                 if tx.to_address == to_address:
-                    vote.append(tx)
+                    vote.append(tx.serialize())
         return vote
 
     @staticmethod

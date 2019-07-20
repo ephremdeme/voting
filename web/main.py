@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, request, jsonify, send_file
 
-from web.BlockchainAPINode import votedb
+from web.auth import admin_permission
 from . import db
+from web.BlockchainAPINode import votedb
+from .models import Vote
 from flask_login import login_required, current_user
 
 main = Blueprint('main', __name__)
@@ -18,11 +20,13 @@ def create_election():
 
 
 @main.route('/create_election', methods=["POST"])
+@login_required
 def election_post():
     year = request.form.get('year')
     school = request.form.get('school')
     dept = request.form.get('dept')
     sec = request.form.get('section')
+    vote_name = request.form.get('vote_name')
     candidate = request.form.get('candidate[]')
     candidate = str(candidate).splitlines()
     sec_hash = votedb.sec_hash(year, school, dept, sec)
@@ -32,10 +36,15 @@ def election_post():
     from util import ExcelUtil
     array = ExcelUtil.read_excel('voter_list.xlsx')
     votedb.store_sec_address(array, sec_hash)
-
     votedb.store_sec_candidate(array=candidate, section=sec_hash)
     ExcelUtil.write_to_excel(array)
     print(votedb.get_sec_candidate(sec_hash))
+
+    vote = Vote(vote_name=vote_name, hash=sec_hash, user_id=current_user.id)
+    db.session.add(vote)
+    db.session.commit()
+    print(current_user.votes)
+
     return send_file('../gen.xlsx', as_attachment=True)
 
 
@@ -53,5 +62,3 @@ def get_candidate():
 @login_required
 def profile():
     return render_template('explorer.html', name=current_user.name)
-
-

@@ -1,5 +1,7 @@
 import jsonpickle
 import plyvel
+import hashlib
+from fastecdsa import keys, curve
 
 
 class DBUtil:
@@ -45,7 +47,7 @@ class DBUtil:
         try:
             with secdb.write_batch(transaction=True) as write:
                 for i in range(0, len(array)):
-                    write.put(str(i).encode(), array[i].encode())
+                    write.put(self.address_gen().encode(), array[i].encode())
             return True
         except:
             print("not completed successfully")
@@ -55,9 +57,9 @@ class DBUtil:
         section = (str(section) + "cand").encode()
         secdb = self._db.prefixed_db(section)
         value = []
-        with secdb.iterator(include_key=False) as it:
-            for kv in it:
-                value.append(kv.decode())
+        with secdb.iterator() as it:
+            for k, v in it:
+                value.append((k.decode(), v.decode()))
         return value
 
     def store_block(self, index, value):
@@ -162,6 +164,14 @@ class DBUtil:
         sec = str(sec) + str(year) + str(school) + str(dept)
         sec_hash = sha256(sec.encode()).hexdigest()
         return sec_hash
+
+    @staticmethod
+    def address_gen():
+        priv = keys.gen_private_key(curve=curve.P256)
+        pub_key = keys.get_public_key(priv, curve=curve.P256)
+        h = hashlib.new('ripemd160')
+        h.update(hashlib.sha256(str(pub_key).encode()).digest())
+        return h.hexdigest()
 
     @staticmethod
     def comparator(key1, key2):

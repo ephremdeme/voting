@@ -38,6 +38,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     name = db.Column(db.String(100))
     role = db.Column(db.String(100))
+    votes = db.relationship('Vote', backref='author', lazy=True)
 
     @cached_property
     def permissions(self):
@@ -59,3 +60,15 @@ class User(UserMixin, db.Model):
     @property
     def is_admin(self):
         return self.role == self.ADMIN
+
+
+class Vote(db.Model):
+    id = db.Column(db.Integer, primary_key=True)  # primary keys are required by SQLAlchemy
+    vote_name = db.Column(db.String(100), default='')
+    hash = db.Column(db.String(100), default='', unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f"Vote('{self.vote_name}', '{self.hash}')"
+
+

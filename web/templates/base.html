@@ -17,6 +17,7 @@
     <link rel="stylesheet" href={{ url_for('static', filename="css/mdb.min.css")}}>
     <link rel="stylesheet" href={{ url_for('static', filename="css/fontawesomeall.css")}}>
     <link rel="stylesheet" href={{ url_for('static', filename="css/starter-template.css")}}>
+    <link rel="stylesheet" href={{ url_for('static', filename="css/dashboard.css")}}>
 
     <style>
       .bd-placeholder-img {
@@ -81,7 +82,7 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-        <a class="navbar-brand" href="/">Astu E-Voting</a>
+        <a class="navbar-brand" href="{{ url_for('api.admin') }}">Astu E-Voting</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -94,7 +95,7 @@
               <li class="nav-item ">
                 <a class="nav-link" href="{{ url_for('api.home') }}" > <i class="fas fa-link"></i> BlockChian <span class="sr-only">(current)</span></a>
               </li>
-              {% if current_user.is_authenticated %}
+              {% if current_user.is_authenticated  %}
                 <li class="nav-item">
                   <a class="nav-link" href="{{ url_for('main.create_election') }}"> <i class="fas fa-vote-yea"></i> Create Election</a>
                 </li>

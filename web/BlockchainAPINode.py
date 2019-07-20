@@ -1,9 +1,14 @@
 from flask import Flask, jsonify, request, send_file, Blueprint, render_template
 import requests
 from uuid import uuid4
+
+from flask_login import current_user
+
 from blockchain.Blockchain import Blockchain
 from sys import argv
 import jsonpickle
+
+from web.auth import admin_permission
 
 print(argv[3])
 # Creating a Web App
@@ -19,6 +24,16 @@ blockchain.read_chain()
 votedb = blockchain.db
 
 api = Blueprint('api', __name__)
+
+
+@api.route('/admin', methods=['GET'])
+@admin_permission.require(401)
+def admin():
+    sec_hash = request.args.get('vote_name', '')
+    result, count = blockchain.vote_result(sec_hash)
+    from web import db
+
+    return render_template('admin.html', votes=current_user.votes, result=result, count=count)
 
 
 @api.route("/blockchain", methods=['GET'])
@@ -64,9 +79,20 @@ def block_by_id(block_id):
 
 @api.route('/transaction/<tx_id>', methods=['GET'])
 def transaction_id(tx_id):
+    print(blockchain.find_vote_by_id(tx_id))
     tx, block = blockchain.find_vote_by_id(tx_id)
-
     return jsonify({'vote': tx.serialize(), 'block': block.serialize()})
+
+
+@api.route('/result/<vote_hash>', methods=['GET'])
+def vote_results(vote_hash):
+    return jsonify({'result': blockchain.vote_result(vote_hash)})
+
+
+@api.route('/vote/<cand_id>', methods=['GET'])
+def cand_result(cand_id):
+    result = blockchain.find_candidate_vote(cand_id)
+    return jsonify({'cand': result})
 
 
 @api.route('/mine', methods=['GET'])

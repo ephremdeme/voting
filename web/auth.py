@@ -1,7 +1,11 @@
+import json
+
+import jsonpickle
 from flask import Blueprint, render_template, redirect, url_for, request, flash, Response
+from flask.json import jsonify
 from flask_principal import Permission, RoleNeed
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import User
+from .models import User, Vote
 from . import db
 
 from flask_login import login_user, login_required, logout_user
@@ -16,10 +20,20 @@ def login():
     return render_template('login.html')
 
 
-@auth.route('/admin')
-@admin_permission.require(401)
-def do_admin_index():
-    return Response('Only if you are an admin')
+@auth.route('/gui/login', methods=['POST'])
+def gui_login():
+    data = request.get_json()
+    email = data['email']
+    password = data['password']
+    print(email, password)
+    user = User.query.filter_by(email=email).first()
+    vote_array = []
+
+    if user:
+        for vote in user.votes:
+            vote_array.append((vote.vote_name, vote.hash))
+
+    return jsonify({'list': vote_array})
 
 
 @auth.route('/login', methods=["POST"])

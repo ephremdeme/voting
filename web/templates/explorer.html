@@ -17,7 +17,7 @@
                     <select id="searchBy" class="form-control" ng-model="searchType">
                         <option value="block">Block Index</option>
                         <option value="transaction">Transaction ID</option>
-                        <option value="address">Address</option>
+                        <option value="vote">Candidate</option>
                     </select>
                 </div>
                 <button type="submit" id="search" class="btn btn-primary margin-auto btn-search">
@@ -34,11 +34,11 @@
         <div class="col-md-10 offset-md-1">
             <!-- 'display block' table -->
             <h3 class="table-title" ng-if="block">Block</h3>
-            <table class="table table-striped" id="blockTable">
+            <table class="table table-borderless " id="blockTable">
                 
             </table>
 
-            <h3 class="table-title" ng-if="transaction">Transaction</h3>
+            <h3 class="table-title" ng-if="transaction">Vote</h3>
             <table class="table table-striped" id="voteTable" >
 
             </table>
