@@ -38,9 +38,10 @@ git clone https://github.com/ephremdeme/voting.git
 ```text
 pip install -r requirements.txt 
 ```
+* First export Flask web app using `export FLASK_APP=web`
 * on linux terminal run `./run.sh`, this will apen a 6 tab terminal for 6 network nodes 
 * or add each node like `python BlockchainAPINode.py 5000`
-* to add peer node, open postman POST request `localhost:5000/register-node/broadcast`
+* to add peer node to the blockchain, open postman POST request `localhost:5000/register-node/broadcast`
 and send json ` { "new_node":  "http://localhost:5002"} `
 * to start the blockchain client, go to `cd client` and execute: ` python clientGUI.py`
 * finally open your browser and go to `localhost:5000` 
