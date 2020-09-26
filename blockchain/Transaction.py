@@ -38,16 +38,4 @@ class Transaction:
             'amount': self.amount
         }
 
-# private_key = keys.gen_private_key(curve.P256)
-#
-# public_key  = keys.get_public_key(private_key, curve.P256)
-# print(sha256( str(public_key).encode()).digest())
-# print('priva_key ', private_key)
-#
-# h = hashlib.new('ripemd160')
-# h.update(sha256( str(public_key).encode()).digest())
-# print('ripemd' ,h.hexdigest())
-#
-# Tx1 = Transaction(public_key, 'to add', 1223)
-# Tx1.sign_tx(private_key)
-# print(Tx1.is_valid())
+
