@@ -4,7 +4,7 @@ import requests
 import pyrebase
 import jsonpickle
 
-from client.Transaction import Transaction
+from Transaction import Transaction
 
 config = {
     'apiKey': "AIzaSyBQd1bnNrEpuXbbPH_c15M6kYwv79jU6Ew",
