@@ -3,7 +3,7 @@
 from tkinter import *
 from tkinter import ttk
 
-from client.wallet import Wallet
+from wallet import Wallet
 
 root = Tk()
 amount = IntVar()
@@ -51,11 +51,11 @@ def sent():
 
 
 mainframe = ttk.Frame(root)
-label = Label(mainframe, text="insert a word")
+label = Label(mainframe, text="Cast Your Vote")
 label.pack()
 
 amount_entry = Entry(mainframe, textvariable=amount)
-amount_entry.insert(0, "amount")
+amount_entry.insert(1, "")
 amount_entry.pack()
 
 address_entry = Entry(mainframe, textvariable=address)

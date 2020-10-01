@@ -3,4 +3,4 @@
 *.xml
 *.iml
 *.gitignore
-web/static/*
+web/static/svgs/*

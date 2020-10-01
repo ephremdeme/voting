@@ -61,12 +61,14 @@ def transaction_broadcast():
     if blockchain.add_to_pending_transaction(transaction):
         transaction = jsonpickle.encode(transaction)
     else:
-        response = {'message': 'This transaction is invalid will not be added to Block '}
+        response = {
+            'message': 'This transaction is invalid will not be added to Block '}
         return jsonify(response), 500
 
     if len(blockchain.networkNodes) is not 0:
         for node in blockchain.networkNodes:
-            requests.post(node + '/transaction/broadcast', json=transaction, timeout=2)
+            requests.post(node + '/transaction/broadcast',
+                          json=transaction, timeout=2)
 
     return jsonify({'note': 'Transaction created and broadcast successfully.',
                     'pendingTransaction': [e.serialize() for e in blockchain.pendingTransaction]}), 200
@@ -115,7 +117,8 @@ def mine():
 
     for node in blockchain.networkNodes:
         try:
-            requests.post(node + '/receive-new-block', json={'new_block': block})
+            requests.post(node + '/receive-new-block',
+                          json={'new_block': block})
             print(1, "the block is transmitted to" + str(node))
         except:
             print("exception occurred ")
@@ -153,7 +156,8 @@ def receive_new_block():
         new_block = jsonpickle.encode(new_block)
         for node in blockchain.networkNodes:
             try:
-                requests.post(node + '/receive-new-block', json={'new_block': new_block})
+                requests.post(node + '/receive-new-block',
+                              json={'new_block': new_block})
                 print(1, "the block is transmitted to" + str(node))
             except:
                 pass
@@ -183,7 +187,8 @@ def register_broadcast_node():
 
     all_network_nodes = blockchain.networkNodes
     all_network_nodes.append(currentNodeURl)
-    requests.post(new_node + '/register-bulk-nodes', json={'all_network_nodes': all_network_nodes})
+    requests.post(new_node + '/register-bulk-nodes',
+                  json={'all_network_nodes': all_network_nodes})
 
     all_network_nodes.remove(currentNodeURl)
 
@@ -229,7 +234,8 @@ def consensus():
 
     for block in all_blockchain:
         block['chain'] = jsonpickle.decode(block['chain'])
-        block['pendingTransaction'] = jsonpickle.decode(block['pendingTransaction'])
+        block['pendingTransaction'] = jsonpickle.decode(
+            block['pendingTransaction'])
         if True:
             if len(block['chain']) > max_len:
                 max_len = len(block['chain'])
@@ -238,7 +244,7 @@ def consensus():
 
     if blockchain.is_chain_valid(best_chain) and len(best_chain):
         blockchain.replace(best_chain)
-        print(len(best_chain == blockchain.count()))
+        print(len(best_chain) == blockchain.count())
         blockchain.read_chain()
         blockchain.pendingTransaction = new_pending_transaction
         return jsonify({'message': 'This chain has been replaced ', 'chain': [e.serialize() for e in best_chain]})
