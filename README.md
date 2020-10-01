@@ -30,11 +30,11 @@ allowed to cast their vote.!>
 * p2p communication
 
 # Installation
-* first clone the repository
+* first clone the repository by typing this code into your terminal.
 ```text
 git clone https://github.com/ephremdeme/voting.git
 ```
-* simply ` cd voting` and install all the dependencies from requirement.txt
+* simply ` cd voting` and install all the dependencies from requirement.txt by typing this code
 ```text
 pip install -r requirements.txt 
 ```
