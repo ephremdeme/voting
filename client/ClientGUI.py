@@ -11,16 +11,6 @@ address = StringVar()
 ans = StringVar()
 wallet = Wallet()
 
-
-# config = {
-#     'apiKey': "AIzaSyBQd1bnNrEpuXbbPH_c15M6kYwv79jU6Ew",
-#     'authDomain': "e-votingastu.firebaseapp.com",
-#     'databaseURL': "https://e-votingastu.firebaseio.com",
-#     'projectId': "e-votingastu",
-#     'storageBucket': "e-votingastu.appspot.com",
-#     'messagingSenderId': "98525044697",
-#     'appId': "1:98525044697:web:90bd1ab962dcecad"
-# }
 #
 # firebase = pyrebase.initialize_app(config)
 # auth = firebase.auth()

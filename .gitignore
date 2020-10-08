@@ -4,3 +4,5 @@
 *.iml
 *.gitignore
 web/static/svgs/*
+client/config.py
+web_client/src/assets/Polys organizer panel.pdf

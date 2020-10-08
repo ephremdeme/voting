@@ -3,18 +3,9 @@ import hashlib
 import requests
 import pyrebase
 import jsonpickle
-
+from config import config
 from Transaction import Transaction
 
-config = {
-    'apiKey': "AIzaSyBQd1bnNrEpuXbbPH_c15M6kYwv79jU6Ew",
-    'authDomain': "e-votingastu.firebaseapp.com",
-    'databaseURL': "https://e-votingastu.firebaseio.com",
-    'projectId': "e-votingastu",
-    'storageBucket': "e-votingastu.appspot.com",
-    'messagingSenderId': "98525044697",
-    'appId': "1:98525044697:web:90bd1ab962dcecad"
-}
 
 firebase = pyrebase.initialize_app(config)
 auth = firebase.auth()
@@ -35,7 +26,8 @@ class Wallet:
                 "private_key": self.privateKey
             }
             auth.get_account_info(user['idToken'])
-            user_id = auth.get_account_info(user['idToken'])['users'][0]['localId']
+            user_id = auth.get_account_info(user['idToken'])[
+                'users'][0]['localId']
             db.child('users').child(user_id).push(data, user['idToken'])
             return True
         except Exception as e:
@@ -46,8 +38,10 @@ class Wallet:
         try:
             user = auth.sign_in_with_email_and_password(email, password)
             auth.get_account_info(user['idToken'])
-            user_id = auth.get_account_info(user['idToken'])['users'][0]['localId']
-            private_key = list(db.child('users').child(user_id).get(user['idToken']).val().values())[0]
+            user_id = auth.get_account_info(user['idToken'])[
+                'users'][0]['localId']
+            private_key = list(db.child('users').child(
+                user_id).get(user['idToken']).val().values())[0]
             self.privateKey = private_key
             self.address = self.address_gen()
             self.publicKey = keys.get_public_key(self.privateKey, curve.P256)
@@ -73,5 +67,8 @@ class Wallet:
         transaction = Transaction(self.address, receiver, amount)
         transaction.sign_tx(self.privateKey)
         transaction = jsonpickle.encode(transaction)
-        r = requests.post('http://localhost:5000/transaction/broadcast', json=transaction)
+        r = requests.post(
+            'http://localhost:5000/transaction/broadcast', json=transaction)
         return r.status_code
+
+
