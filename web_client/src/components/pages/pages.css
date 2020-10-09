@@ -1,0 +1,22 @@
+
+.intro-title{
+    font-size: 2.1em;
+    font-weight: 500;
+    line-height: 1.5em;
+}
+
+.intro-descr{
+    line-height: 1.5em;
+    font-size: 1.2em;
+    font-weight: 400;
+}
+
+.table-title {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.table {
+    background-color: #ffffff;
+    box-shadow: 2px 2px 15px -3px rgba(0, 0, 0, 0.75);
+}
