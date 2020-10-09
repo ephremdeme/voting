@@ -1,12 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MDBContainer, MDBBtn, MDBCol } from "mdbreact";
 import "../pages.css";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchBlocks } from "./explorerSlices";
 
 const BlockExplorer = () => {
-  const [isFound, setIsFound] = useState(false);
+  const dispach = useDispatch();
+  const { loading, isBlock, error, block, candidates } = useSelector(
+    (state) => state.blocks
+  );
+
+  const [search, setSearch] = useState({
+    search_by: "block",
+    search_key: "",
+  });
+
+  const [transactions, setTransactions] = useState([]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSearch({
+      ...search,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(search);
+    dispach(fetchBlocks(search));
+  };
 
   return (
-    <section className="mt-5 pt-4">
+    <section className="mt-5">
       <MDBContainer>
         <div className="row">
           <div className=" text-center col-12 my-3">
@@ -14,18 +40,25 @@ const BlockExplorer = () => {
           </div>
         </div>
         <div className="row ">
-          <div className="col-12 offset-md-4  my-3">
-            <form>
+          <div className="col-12 offset-md-2  my-3">
+            <form onSubmit={handleSubmit}>
               <div className="form-group col-md-7 col-sm-7 my-4">
                 <input
                   type="text"
+                  onChange={handleChange}
                   id="key"
+                  name="search_key"
                   placeholder="Block Index or Txs ID or Candidate ID"
                   className="form-control"
                 />
               </div>
               <div className="form-group col-md-7 col-sm-7">
-                <select id="searchBy" className="form-control">
+                <select
+                  name="search_by"
+                  onChange={handleChange}
+                  id="searchBy"
+                  className="form-control"
+                >
                   <option value="block">Block Index</option>
                   <option value="transaction">Transaction ID</option>
                   <option value="vote">Candidate</option>
@@ -35,53 +68,63 @@ const BlockExplorer = () => {
                 Search
               </MDBBtn>
             </form>
-            {isFound && (
-              <p className="no-data-text">No data found for search.</p>
-            )}
+            {error && <p className="no-data-text">No data found for search.</p>}
           </div>
         </div>
 
-        <BlockDisplay />
+        <ShowBlock block={block} />
+        {isBlock && <ShowTxs transactions={block.transactions} />}
+        {!isBlock && <ShowTxs transactions={candidates} />}
       </MDBContainer>
     </section>
   );
 };
 
-const BlockDisplay = () => {
+const BlockDisplay = ({ block, candidates }) => {
   return (
-    <div className="row">
-      <div className="col">
-        <ShowBlock block={"help"} />
+    <React.Fragment>
+      <div className="row">
+        <div className="col">
+          <ShowBlock block={block} />
+        </div>
       </div>
-      <MDBCol>
-        <ShowTxs transaction={"hjbh"} />
-      </MDBCol>
-    </div>
+      <div className="row mb-5 pb-5">
+        <MDBCol>
+          <ShowTxs transactions={candidates || block.transactions} />
+        </MDBCol>
+      </div>
+    </React.Fragment>
   );
 };
 
-const ShowTxs = ({ transaction }) => {
+const ShowTxs = ({ transactions }) => {
   return (
     <React.Fragment>
-      <h3 className="table-title intro-title" ng-if="transaction">
-        Vote
-      </h3>
-      <table className="table table-borderless" ng-if="transaction">
-        <thead class="thead-dark">
-          <tr>
-            <th scope="col">#</th> <th scope="col">ID</th>{" "}
-            <th scope="col">VOTER</th> <th scope="col">CANDIDATE</th>{" "}
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <td>{transaction}</td>
-            <td>Recipient</td>
-            <td>{transaction}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="row mb-5 pb-5">
+        <MDBCol>
+          <h3 className="table-title intro-title" ng-if="transaction">
+            Vote
+          </h3>
+          <table className="table table-borderless" ng-if="transaction">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">#</th> <th scope="col">ID</th>{" "}
+                <th scope="col">VOTER</th> <th scope="col">CANDIDATE</th>{" "}
+              </tr>
+            </thead>
+            <tbody className="overflow-auto">
+              {transactions.map((tx, ind) => (
+                <tr>
+                  <td>{ind}</td>
+                  <td>{tx.id}</td>
+                  <td>{tx.from_address}</td>
+                  <td>{tx.to_address}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </MDBCol>
+      </div>
     </React.Fragment>
   );
 };
@@ -89,33 +132,37 @@ const ShowTxs = ({ transaction }) => {
 const ShowBlock = ({ block }) => {
   return (
     <React.Fragment>
-      <h3 className="table-title intro-title" ng-if="block">
-        Block
-      </h3>
-      <table className="table " ng-if="block">
-        <tbody>
-          <tr>
-            <td className="font-weight-normal">Block Hash</td>
-            <td>{block.hash}</td>
-          </tr>
-          <tr>
-            <td className="font-weight-normal">Index</td>
-            <td>{block.index}</td>
-          </tr>
-          <tr>
-            <td className="font-weight-normal">Time Stamp</td>
-            <td>{block.timestamp}</td>
-          </tr>
-          <tr>
-            <td className="font-weight-normal">Nonce</td>
-            <td>{block.nonce}</td>
-          </tr>
-          <tr>
-            <td className="font-weight-normal">Previous Hash</td>
-            <td>{block.previousBlockHash}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="row">
+        <div className="col">
+          <h3 className="table-title intro-title" ng-if="block">
+            Block
+          </h3>
+          <table className="table " ng-if="block">
+            <tbody>
+              <tr>
+                <td className="font-weight-normal">Block Hash</td>
+                <td>{block.hash}</td>
+              </tr>
+              <tr>
+                <td className="font-weight-normal">Index</td>
+                <td>{block.index}</td>
+              </tr>
+              <tr>
+                <td className="font-weight-normal">Time Stamp</td>
+                <td>{block.timestamp}</td>
+              </tr>
+              <tr>
+                <td className="font-weight-normal">Nonce</td>
+                <td>{block.nonce}</td>
+              </tr>
+              <tr>
+                <td className="font-weight-normal">Previous Hash</td>
+                <td>{block.previousBlockHash}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </React.Fragment>
   );
 };
