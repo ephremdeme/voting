@@ -26,12 +26,14 @@ const AppResult = () => {
         </MobileOrTablet>
 
         <Desktop>
-          <MDBCardBody>
-            <MDBRow>
+          <MDBCardBody className="mx-5 px-5">
+            <MDBRow className="mx-5 px-5">
               <MDBCol className="vl">
                 <MDBRow className=" my-4">
                   <MDBCol>
-                    <h3 className=" title">Results</h3>
+                    <h3 className=" title" style={{ fontStyle: "italic" }}>
+                      Results
+                    </h3>
                   </MDBCol>
                 </MDBRow>
                 <CandidateResult />
@@ -61,14 +63,14 @@ const VoteInfo = () => {
       <MDBRow center className="my-4">
         <MDBCol className=" overflow-auto justify-content-center">
           <MobileOrTablet>
-            <div className="my-2 vote-link text-center">
+            <div className=" vote-link text-center">
               http:localhost:3000/3jhjgdhsvdb
             </div>
           </MobileOrTablet>
           <Desktop>
             <div
-              style={{ fontSize: "2.4em", height:"50px" }}
-              className="my-2 vote-link text-center"
+              style={{ fontSize: "2.4em", height: "auto" }}
+              className=" vote-link text-center"
             >
               http:localhost:3000/3jhjgdhsvdb
             </div>
