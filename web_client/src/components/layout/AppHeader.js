@@ -62,23 +62,17 @@ class AppHeader extends Component {
             {!isLoggenIn && (
               <React.Fragment>
                 <MDBNavItem className="mx-1">
-                  <MDBNavLink to="#!">
-                    Login
-                  </MDBNavLink>
+                  <MDBNavLink to="/login">Login</MDBNavLink>
                 </MDBNavItem>
                 <MDBNavItem className="mx-1">
-                  <MDBNavLink  to="#!">
-                    Sign Up 
-                  </MDBNavLink>
+                  <MDBNavLink to="/signup">Sign Up</MDBNavLink>
                 </MDBNavItem>
               </React.Fragment>
             )}
 
             {isLoggenIn && (
               <MDBNavItem className="mx-1">
-                <MDBNavLink to="#!">
-                  Sign Out 
-                </MDBNavLink>
+                <MDBNavLink to="#!">Sign Out</MDBNavLink>
               </MDBNavItem>
             )}
 
