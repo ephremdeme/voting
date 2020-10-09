@@ -38,7 +38,7 @@
 }
 
 .vote-link {
-  margin: 24px 0 70px;
+  margin: 24px 0 24px;
   -webkit-user-select: text;
   -moz-user-select: text;
   user-select: text;
