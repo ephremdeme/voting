@@ -83,7 +83,7 @@ def block_by_id(block_id):
 def transaction_id(tx_id):
     print(blockchain.find_vote_by_id(tx_id))
     tx, block = blockchain.find_vote_by_id(tx_id)
-    return jsonify({'vote': tx.serialize(), 'block': block.serialize()})
+    return jsonify({'candidates': tx.serialize(), 'block': block.serialize()})
 
 
 @api.route('/result/<vote_hash>', methods=['GET'])
@@ -94,7 +94,7 @@ def vote_results(vote_hash):
 @api.route('/vote/<cand_id>', methods=['GET'])
 def cand_result(cand_id):
     result = blockchain.find_candidate_vote(cand_id)
-    return jsonify({'cand': result})
+    return jsonify({'candidates': result})
 
 
 @api.route('/mine', methods=['GET'])

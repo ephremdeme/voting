@@ -2,6 +2,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_principal import Principal, Identity, AnonymousIdentity, identity_loaded
+from flask_cors import CORS
+
 
 # init SQLAlchemy so we can use it later in our models
 db = SQLAlchemy()
@@ -9,6 +11,8 @@ db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
+
     app.run(host='0.0.0.0')
     app.config['SECRET_KEY'] = '9OLWxNauth_blueprintD4o83j4K4iuopO'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
