@@ -35,14 +35,26 @@ var months = [
   "September",
   "October",
   "November",
-  "December"
+  "December",
 ];
 
-export const month = id => months[id];
+export const month = (id) => months[id];
 
-export const getDate = date =>
+export const getDate = (date) =>
   new Date(parseInt(date))
     .toGMTString()
     .replace("GMT", "")
     .replace(":00 ", "")
     .replace("00:00", "");
+
+export const tokenConfig = () => {
+  const token = localStorage.getItem("token");
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    accept: "application/json",
+  };
+  if (token) config.headers["Authorization"] = `Bearer ${token}`;
+  return config;
+};
