@@ -19,8 +19,6 @@ export const fetchBlocks = createAsyncThunk(
   "blocks/fetchBlocks",
   async (search, thunkAPI) => {
     const { search_by, search_key } = search;
-    console.log("serach:" + search_by, "searchKey:" + search_key);
-    console.log("help");
 
     try {
       const response = await fetch(

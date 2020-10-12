@@ -6,7 +6,7 @@ import { fetchBlocks } from "./explorerSlices";
 
 const BlockExplorer = () => {
   const dispach = useDispatch();
-  const { loading, isBlock, error, block, candidates } = useSelector(
+  const { isBlock, error, block, candidates } = useSelector(
     (state) => state.blocks
   );
 
@@ -72,7 +72,7 @@ const BlockExplorer = () => {
           </div>
         </div>
 
-        <ShowBlock block={block} />
+        {isBlock && <ShowBlock block={block} />}
         {isBlock && <ShowTxs transactions={block.transactions} />}
         {!isBlock && <ShowTxs transactions={candidates} />}
       </MDBContainer>
@@ -102,20 +102,20 @@ const ShowTxs = ({ transactions }) => {
     <React.Fragment>
       <div className="row mb-5 pb-5">
         <MDBCol>
-          <h3 className="table-title intro-title" ng-if="transaction">
+          <h3 className="table-title intro-title" >
             Vote
           </h3>
-          <table className="table table-borderless" ng-if="transaction">
-            <thead class="thead-dark">
+          <table className="table table-borderless" >
+            <thead className="thead-dark">
               <tr>
-                <th scope="col">#</th> <th scope="col">ID</th>{" "}
-                <th scope="col">VOTER</th> <th scope="col">CANDIDATE</th>{" "}
+                <th scope="col">#</th> <th scope="col">Tx ID</th>
+                <th scope="col">VOTER</th> <th scope="col">CANDIDATE</th>
               </tr>
             </thead>
             <tbody className="overflow-auto">
               {transactions.map((tx, ind) => (
                 <tr>
-                  <td>{ind}</td>
+                  <td>{ind + 1}</td>
                   <td>{tx.id}</td>
                   <td>{tx.from_address}</td>
                   <td>{tx.to_address}</td>
