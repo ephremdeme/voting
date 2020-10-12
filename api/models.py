@@ -2,9 +2,11 @@ from flask_login import UserMixin
 from flask_principal import RoleNeed, UserNeed
 from flask_sqlalchemy import BaseQuery
 from werkzeug.utils import cached_property
+from . import create_app
 from . import db
 import jwt
 import datetime
+
 
 class UserQuery(BaseQuery):
 
@@ -34,7 +36,8 @@ class User(UserMixin, db.Model):
     MEMBER = "member"
     ADMIN = "admin"
 
-    id = db.Column(db.Integer, primary_key=True)  # primary keys are required by SQLAlchemy
+    # primary keys are required by SQLAlchemy
+    id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
     name = db.Column(db.String(100))
@@ -62,9 +65,45 @@ class User(UserMixin, db.Model):
     def is_admin(self):
         return self.role == self.ADMIN
 
+    def encode_auth_token(self, user_id):
+        """
+        Generates the Auth Token
+        :return: string
+        """
+        try:
+            payload = {
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1, seconds=5),
+                'iat': datetime.datetime.utcnow(),
+                'sub': user_id
+            }
+            return jwt.encode(
+                payload,
+                create_app().config.get('SECRET_KEY'),
+                algorithm='HS256'
+            )
+        except Exception as e:
+            return e
+
+    @staticmethod
+    def decode_auth_token(auth_token):
+        """
+        Decodes the auth token
+        :param auth_token:
+        :return: integer|string
+        """
+        try:
+            payload = jwt.decode(
+                auth_token, create_app().config.get('SECRET_KEY'))
+            return payload['sub']
+        except jwt.ExpiredSignatureError:
+            return 'Signature expired. Please log in again.'
+        except jwt.InvalidTokenError:
+            return 'Invalid token. Please log in again.'
+
 
 class Vote(db.Model):
-    id = db.Column(db.Integer, primary_key=True)  # primary keys are required by SQLAlchemy
+    # primary keys are required by SQLAlchemy
+    id = db.Column(db.Integer, primary_key=True)
     vote_name = db.Column(db.String(100), default='')
     hash = db.Column(db.String(100), default='', unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -72,23 +111,9 @@ class Vote(db.Model):
     def __repr__(self):
         return f"Vote('{self.vote_name}', '{self.hash}')"
 
-
-
-def encode_auth_token(self, user_id):
-    """
-    Generates the Auth Token
-    :return: string
-    """
-    try:
-        payload = {
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=5),
-            'iat': datetime.datetime.utcnow(),
-            'sub': user_id
+    def toJson(self):
+        return {
+            "id": self.id,
+            "vote_name": self.vote_name,
+            "hash": self.hash,
         }
-        return jwt.encode(
-            payload,
-            app.config.get('SECRET_KEY'),
-            algorithm='HS256'
-        )
-    except Exception as e:
-        return e

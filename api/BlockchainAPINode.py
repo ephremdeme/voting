@@ -8,10 +8,13 @@ from blockchain.Blockchain import Blockchain
 from sys import argv
 import jsonpickle
 
-from web.auth import admin_permission
+from api.auth import admin_permission
+
+from . import token_required, db
+from api.models import Vote
 
 print(argv[3])
-# Creating a Web App
+# Creating a api App
 PORT = argv[3]
 # Creating an address for the node on Port 5000
 node_address = str(uuid4()).replace('-', '')
@@ -31,8 +34,6 @@ api = Blueprint('api', __name__)
 def admin():
     sec_hash = request.args.get('vote_name', '')
     result, count = blockchain.vote_result(sec_hash)
-    from web import db
-
     return render_template('admin.html', votes=current_user.votes, result=result, count=count)
 
 
@@ -88,7 +89,16 @@ def transaction_id(tx_id):
 
 @api.route('/result/<vote_hash>', methods=['GET'])
 def vote_results(vote_hash):
-    return jsonify({'result': blockchain.vote_result(vote_hash)})
+    result, count = blockchain.vote_result(vote_hash)
+    vote  = Vote.query.filter_by(
+        hash=vote_hash).first()
+    # db.session.delete(vote)
+    # db.session.commit()
+    return jsonify({
+        "name" : vote.vote_name,
+        'result': result,
+        "total": count
+        })
 
 
 @api.route('/vote/<cand_id>', methods=['GET'])
