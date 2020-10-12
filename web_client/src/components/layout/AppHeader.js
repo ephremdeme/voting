@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import {
   MDBNavbar,
   MDBNavbarBrand,
@@ -9,89 +9,94 @@ import {
   MDBNavLink,
   MDBIcon,
 } from "mdbreact";
+import { useSelector } from "react-redux";
 
-class AppHeader extends Component {
-  state = {
-    collapse: false,
-    isLoggenIn: false,
-  };
+const AppHeader = () => {
+  const [collapse, setCollapse] = useState(false);
 
-  onClick = () => {
-    this.setState({
-      collapse: !this.state.collapse,
+  const { isAuthenticated, user } = useSelector((state) => state.auths);
+
+  const onClick = () => {
+    setCollapse({
+      collapse: !collapse,
     });
   };
 
-  toggle = () => {
-    this.setState({
-      dropdownOpen: !this.state.dropdownOpen,
-    });
-  };
-
-  render() {
-    const { isLoggenIn, collapse } = this.state;
-    return (
-      <MDBNavbar
-        className="flexible-navbar"
-        color="unique-color-dark"
-        dark
-        expand="md"
-        scrolling
-      >
-        <MDBNavbarBrand href="/">
-          <strong style={{ color: "whitesmoke" }}>ASTU VOTING</strong>
-        </MDBNavbarBrand>
-        <MDBNavbarToggler onClick={this.onClick} />
-        <MDBCollapse isOpen={collapse} navbar>
-          <MDBNavbarNav right>
+  return (
+    <MDBNavbar
+      className="flexible-navbar"
+      color="unique-color-dark"
+      dark
+      expand="md"
+      scrolling
+    >
+      <MDBNavbarBrand href="/">
+        <strong style={{ color: "whitesmoke" }}>ASTU VOTING</strong>
+      </MDBNavbarBrand>
+      <MDBNavbarToggler onClick={onClick} />
+      <MDBCollapse isOpen={collapse} navbar>
+        <MDBNavbarNav right>
+          {isAuthenticated && (
             <MDBNavItem className="mx-1">
-              <MDBNavLink to="/explore">
-                <MDBIcon className="fas fa-search" />
-                BlockChain Explore
+              <MDBNavLink to="/admin">
+                <MDBIcon className="fas fa-tachometer-alt" />
+                Dashboard
               </MDBNavLink>
             </MDBNavItem>
-            <MDBNavItem className="mx-1">
-              <MDBNavLink to="#">
-                <MDBIcon className="fas fa-plus" />
-                Create Vote
-              </MDBNavLink>
-            </MDBNavItem>
-          </MDBNavbarNav>
+          )}
+          <MDBNavItem className="mx-1">
+            <MDBNavLink to="/explore">
+              <MDBIcon className="fas fa-search" />
+              BlockChain Explore
+            </MDBNavLink>
+          </MDBNavItem>
 
-          <MDBNavbarNav right>
-            {!isLoggenIn && (
-              <React.Fragment>
-                <MDBNavItem className="mx-1">
-                  <MDBNavLink to="/login">Login</MDBNavLink>
-                </MDBNavItem>
-                <MDBNavItem className="mx-1">
-                  <MDBNavLink to="/signup">Sign Up</MDBNavLink>
-                </MDBNavItem>
-              </React.Fragment>
-            )}
+          <MDBNavItem className="mx-1">
+            <MDBNavLink to="/vote/create_vote">
+              <MDBIcon className="fas fa-plus" />
+              Create Vote
+            </MDBNavLink>
+          </MDBNavItem>
+        </MDBNavbarNav>
 
-            {isLoggenIn && (
+        <MDBNavbarNav right>
+          {!isAuthenticated && (
+            <React.Fragment>
+              <MDBNavItem className="mx-1">
+                <MDBNavLink to="/login">Login</MDBNavLink>
+              </MDBNavItem>
+              <MDBNavItem className="mx-1">
+                <MDBNavLink to="/signup">Sign Up</MDBNavLink>
+              </MDBNavItem>
+            </React.Fragment>
+          )}
+
+          {isAuthenticated && (
+            <React.Fragment>
+              <MDBNavItem className="mx-1">
+                <MDBNavLink to="#!">{user.name}</MDBNavLink>
+              </MDBNavItem>
               <MDBNavItem className="mx-1">
                 <MDBNavLink to="#!">Sign Out</MDBNavLink>
               </MDBNavItem>
-            )}
+            </React.Fragment>
+          )}
 
-            <MDBNavItem>
-              <a
-                className="border border-light rounded mr-1 nav-link Ripple-parent"
-                rel="noopener noreferrer"
-                href="https://github.com/ephremdeme/voting"
-                target="_blank"
-              >
-                <MDBIcon fab icon="github" className="mr-2" />
-                Github
-              </a>
-            </MDBNavItem>
-          </MDBNavbarNav>
-        </MDBCollapse>
-      </MDBNavbar>
-    );
-  }
-}
+          <MDBNavItem>
+            <a
+              className="border border-light rounded mr-1 nav-link Ripple-parent"
+              rel="noopener noreferrer"
+              href="https://github.com/ephremdeme/voting"
+              target="_blank"
+            >
+              <MDBIcon fab icon="github" className="mr-2" />
+              Github
+            </a>
+          </MDBNavItem>
+        </MDBNavbarNav>
+      </MDBCollapse>
+    </MDBNavbar>
+  );
+};
 
 export default AppHeader;
