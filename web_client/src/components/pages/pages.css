@@ -20,3 +20,22 @@
     background-color: #ffffff;
     box-shadow: 2px 2px 15px -3px rgba(0, 0, 0, 0.75);
 }
+
+.dashboard {
+    height: 85vh;
+    padding-left: 8%;
+    padding-right: 8%;
+    background-color: #8B97A8;
+}
+
+.left {
+    z-index: 3;
+    box-shadow: #8B97A8;
+    background-color: white;
+    border-right-width: 1px;
+}
+
+.right {
+    z-index: 1;
+    background-color: #F0F5FC;
+}
