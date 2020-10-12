@@ -1,5 +1,6 @@
 from openpyxl import Workbook, load_workbook
-import random, string
+import random
+import string
 
 
 def read_excel(fname):
@@ -30,10 +31,24 @@ def write_to_excel(array):
     wb.save("gen.xlsx")
 
 
+def generate_pin_excel(count, filename):
+    wb = Workbook()
+    sheet = wb.active
+    item = []
+    array = []
+    for i in range(1, count+1):
+        item.append(generate_pin_password() + "-" + generate_pin_password())
+        sheet.append(tuple(item))
+        array.append(tuple([item[0], i]))
+        item = []
+    wb.save(filename + '.xlsx')
+    return array
+
+
 def generate_pin_password():
     alphanum = string.ascii_uppercase + string.digits
     pin = ""
-    for i in range(6):
+    for i in range(4):
         randchar = random.randrange(0, len(alphanum))
         pin += alphanum[randchar]
     return pin

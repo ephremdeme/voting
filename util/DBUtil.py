@@ -14,7 +14,7 @@ class DBUtil:
         self._hashdb = self._db.prefixed_db(b'hash')
         self._count = self.block_count()
 
-    def store_sec_address(self, array, section):
+    def store_vote_voters(self, array, section):
         section = str(section).encode()
         secdb = self._db.prefixed_db(section)
         with secdb.write_batch(transaction=True) as write:
@@ -23,16 +23,34 @@ class DBUtil:
                 value = str(value).encode()
                 write.put(key, value)
 
-    def verify_voter(self, section, key, value):
+    def verify_voter(self, section, key='r/0890/08'):
         section = str(section).encode()
+        key = str(key).encode()
         secdb = self._db.prefixed_db(section)
-        with secdb.iterator() as it:
-            for k, v in it:
-                if k.decode() == key and v.decode() == value:
-                    return True
-        return False
+        try:
+            result = secdb.get(key).decode()
+            print(result)
+            return True
+        except:
+            return False
+        # with secdb.iterator() as it:
+        #     for k, v in it:
+        #         if k.decode() == key and v.decode() == value:
+        #             return True
+        # return False
+        # return result
 
-    def get_sec_address(self, section):
+    def delete_voter(self, vote_hash, key=b''):
+        key = str(key).encode()
+        vote_hash = str(vote_hash).encode()
+        secdb = self._db.prefixed_db(vote_hash)
+        try:
+            print(secdb.delete(key))
+            return True
+        except:
+            return False
+
+    def get_vote_voter(self, section):
         section = str(section).encode()
         secdb = self._db.prefixed_db(section)
         value = []
@@ -41,7 +59,7 @@ class DBUtil:
                 value.append(kv)
         return value
 
-    def store_sec_candidate(self, array, section):
+    def store_vote_candidates(self, array, section):
         section = (str(section) + "cand").encode()
         secdb = self._db.prefixed_db(section)
         try:
@@ -53,7 +71,7 @@ class DBUtil:
             print("not completed successfully")
             return False
 
-    def get_sec_candidate(self, section):
+    def get_vote_candidates(self, section):
         section = (str(section) + "cand").encode()
         secdb = self._db.prefixed_db(section)
         value = []
@@ -64,7 +82,7 @@ class DBUtil:
 
     def store_block(self, index, value):
         key = str(index).encode()
-        block_hash = value.hash.encode()
+        block_hash = value.hash
         if self.block_exist(key):
             return False
         value = jsonpickle.encode(value).encode()
@@ -159,6 +177,13 @@ class DBUtil:
         return jsonpickle.decode(node)
 
     @staticmethod
+    def vote_hash(name, organizer, id):
+        from hashlib import sha256
+        vote_data = name + organizer + str(id)
+        vote_data_hash = sha256(vote_data.encode()).hexdigest()
+        return vote_data_hash
+
+    @staticmethod
     def sec_hash(year, school, dept, sec):
         from hashlib import sha256
         sec = str(sec) + str(year) + str(school) + str(dept)
@@ -180,8 +205,10 @@ class DBUtil:
         key1 = key1.lower()
         key2 = key2.lower()
         if (key1.isalnum() and key2.isalnum()) and (key1.startswith("block") and key2.startswith("block")):
-            key1 = int(key1.strip("block") if key1.strip("block") is not '' else 0)
-            key2 = int(key2.strip("block") if key2.strip("block") is not '' else 0)
+            key1 = int(key1.strip("block") if key1.strip(
+                "block") is not '' else 0)
+            key2 = int(key2.strip("block") if key2.strip(
+                "block") is not '' else 0)
             if key1 < key2:
                 return -1
             elif key1 > key2:

@@ -4,6 +4,7 @@ fastecdsa==1.7.3
 jsonpickle==1.1
 Flask==1.0.2
 requests==2.20.0
+pyjwt
 plyvel
 flask_principal
 flask_login
