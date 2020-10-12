@@ -16,7 +16,8 @@ class Blockchain:
         self.db.store_genesis_block(Block(1, ' ', '00000', 1, []))
 
     def create_block(self, nonce, prev_hash, block_hash):
-        block = Block(nonce, prev_hash, block_hash, self.count() + 1, self.pendingTransaction)
+        block = Block(nonce, prev_hash, block_hash,
+                      self.count() + 1, self.pendingTransaction)
         print(self.count(), "count")
         if block.is_block_valid():
             self.chain.append(block)
@@ -77,11 +78,13 @@ class Blockchain:
         for i in range(i, count, 10):
             chain = self.db.get_block_range(i - 10, i)
             valid = valid and self.is_chain_valid(chain)
-            if not valid: return False
+            if not valid:
+                return False
         if i < count:
             chain = self.db.get_block_range(i, count)
             valid = valid and self.is_chain_valid(chain)
-            if not valid: return False
+            if not valid:
+                return False
         return True
 
     def replace(self, best_chain):
@@ -201,10 +204,12 @@ class Blockchain:
         if i < count:
             chain = self.db.get_block_range(i, count)
             vote_list.extend(self.collect_vote(chain, to_address=cand))
+        
+        vote_list.extend(self.collect_vote_from_pending(to_address=cand))
         return vote_list
 
     def vote_result(self, sec_hash):
-        candidates = self.db.get_sec_candidate(sec_hash)
+        candidates = self.db.get_vote_candidates(sec_hash)
         result = []
         total = 0
         for (key, cand) in candidates:
@@ -220,6 +225,13 @@ class Blockchain:
             for tx in block.transaction:
                 if tx.to_address == to_address:
                     vote.append(tx.serialize())
+        return vote
+
+    def collect_vote_from_pending(self, to_address):
+        vote = []
+        for tx in self.pendingTransaction:
+            if tx.to_address == to_address:
+                vote.append(tx.serialize())
         return vote
 
     @staticmethod
