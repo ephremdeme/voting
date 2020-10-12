@@ -6,9 +6,9 @@ from flask.json import jsonify
 from flask_principal import Permission, RoleNeed
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User, Vote
-from . import db
+from . import db, token_required
 
-from flask_login import login_user, login_required, logout_user
+from flask_login import login_user, login_required, logout_user, current_user
 
 auth = Blueprint('auth', __name__)
 
@@ -38,9 +38,9 @@ def gui_login():
 
 @auth.route('/login', methods=["POST"])
 def login_post():
-    email = request.form.get('email')
-    password = request.form.get('password')
-    remember = True if request.form.get('remember') else False
+    data = request.get_json()
+    email = data['email']
+    password = data['password']
 
     user = User.query.filter_by(email=email).first()
     print(user)
@@ -49,15 +49,31 @@ def login_post():
     if not user:
         flash('Please check your email address details and try again.')
         # if user doesn't exist or password is wrong, reload the page
-        return redirect(url_for('auth.login'))
+        # return redirect(url_for('auth.login'))
+
+        return jsonify({
+            "msg": "Please check your email address details and try again."
+        })
+
     if not check_password_hash(user.password, password):
         flash('Please check your password details and try again.')
         # if user doesn't exist or password is wrong, reload the page
-        return redirect(url_for('auth.login'))
-
-    login_user(user, remember=remember)
+        # return redirect(url_for('auth.login'))
+        return jsonify({
+            "msg": "Please check your password details and try again."
+        })
+    login_user(user)
+    token = user.encode_auth_token(user.id)
+    print(token)
     # if the above check passes, then we know the user has the right credentials
-    return redirect(url_for('main.profile'))
+    return jsonify({
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "name": user.name
+        },
+        "token": token
+    })
 
 
 @auth.route('/signup', methods=["GET"])
@@ -67,9 +83,11 @@ def signup():
 
 @auth.route('/signup', methods=['POST'])
 def signup_post():
-    email = request.form.get('email')
-    name = request.form.get('name')
-    password = request.form.get('password')
+
+    data = request.get_json()
+    email = data['email']
+    name = data['name']
+    password = data['password']
 
     user = User.query.filter_by(
         email=email).first()  # if this returns a user, then the email already exists in database
@@ -87,13 +105,33 @@ def signup_post():
     user = User.query.filter_by(
         email=email).first()
     login_user(user)
+    token = user.encode_auth_token(user.id)
     # add the new user to the database
 
-    return redirect(url_for('main.profile'))
+    return jsonify({
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "name": user.name
+        },
+        "token": token
+    })
 
 
 @auth.route('/logout')
-@login_required
+@token_required
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
+
+
+@auth.route('/get_user')
+@token_required
+def get_user(current_user):
+    return jsonify({
+        "user": {
+            "id": current_user.id,
+            "email": current_user.email,
+            "name": current_user.name
+        }
+    })

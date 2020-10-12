@@ -1,8 +1,12 @@
-from flask import Flask
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_principal import Principal, Identity, AnonymousIdentity, identity_loaded
 from flask_cors import CORS
+from flask.json import jsonify
+from functools import wraps
+
+import jwt
 
 
 # init SQLAlchemy so we can use it later in our models
@@ -57,3 +61,30 @@ def create_app():
         db.create_all()
 
     return app
+
+
+def token_required(f):
+    from .models import User
+
+    @wraps(f)
+    def decorator(*args, **kwargs):
+
+        token = None
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            token = auth_header.split(" ")[1]
+        print("Token")
+        print(token)
+        if not token:
+            return jsonify({'message': 'a valid token is missing'})
+
+        try:
+            data = jwt.decode(token, create_app().config.get('SECRET_KEY'))
+
+            current_user = User.query.filter_by(
+                id=data['sub']).first()
+
+        except:
+            return jsonify({'message': 'token is invalid'})
+        return f(current_user, *args, **kwargs)
+    return decorator
