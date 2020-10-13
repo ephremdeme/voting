@@ -28,15 +28,6 @@ votedb = blockchain.db
 
 api = Blueprint('api', __name__)
 
-
-@api.route('/admin', methods=['GET'])
-@admin_permission.require(401)
-def admin():
-    sec_hash = request.args.get('vote_name', '')
-    result, count = blockchain.vote_result(sec_hash)
-    return render_template('admin.html', votes=current_user.votes, result=result, count=count)
-
-
 @api.route("/blockchain", methods=['GET'])
 def home():
     print(blockchain.count())
@@ -271,7 +262,3 @@ def connect_node():
         requests.post(currentNodeURl + '/register-node/broadcast', json=data)
     return jsonify({'network nodes': blockchain.networkNodes})
 
-
-@api.route('/vote', methods=['GET'])
-def vote():
-    return jsonify({'vote count': blockchain.calculate_vote(blockchain.chain)})

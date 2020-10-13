@@ -15,11 +15,6 @@ auth = Blueprint('auth', __name__)
 admin_permission = Permission(RoleNeed('admin'))
 
 
-@auth.route('/login', methods=["GET"])
-def login():
-    return render_template('login.html')
-
-
 @auth.route('/gui/login', methods=['POST'])
 def gui_login():
     data = request.get_json()
@@ -76,11 +71,6 @@ def login_post():
     })
 
 
-@auth.route('/signup', methods=["GET"])
-def signup():
-    return render_template('signup.html')
-
-
 @auth.route('/signup', methods=['POST'])
 def signup_post():
 
@@ -122,7 +112,9 @@ def signup_post():
 @token_required
 def logout():
     logout_user()
-    return redirect(url_for('main.index'))
+    return {
+        "message": "Successfully Logged Out"
+    }
 
 
 @auth.route('/get_user')
