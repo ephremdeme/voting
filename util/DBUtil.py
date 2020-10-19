@@ -82,7 +82,7 @@ class DBUtil:
 
     def store_block(self, index, value):
         key = str(index).encode()
-        block_hash = value.hash
+        block_hash = value.hash.encode()
         if self.block_exist(key):
             return False
         value = jsonpickle.encode(value).encode()
@@ -93,7 +93,7 @@ class DBUtil:
 
     def store_block_hash(self, block_hash, index):
         index = str(index).encode()
-        self._hashdb.put(block_hash.encode(), index)
+        self._hashdb.put(block_hash, index)
         return True
 
     def block_count(self):
