@@ -25,6 +25,11 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       localStorage.setItem("token", payload.token);
     },
+    logoutUser: (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      localStorage.removeItem("token");
+    },
     getUser: (state, { payload }) => {
       state.user = payload.user;
       state.isAuthenticated = true;
@@ -52,7 +57,6 @@ const authSlice = createSlice({
 export const signInUser = createAsyncThunk(
   "auths/fetchUser",
   async (form, thunkAPI) => {
-    thunkAPI.dispatch(setLoading());
     const { email, password } = form;
     try {
       const response = await fetch("http://127.0.0.1:5000/login", {
@@ -65,11 +69,10 @@ export const signInUser = createAsyncThunk(
           password: password,
         }),
       });
-
+      thunkAPI.dispatch(setLoading());
       const data = await response.json();
-      console.log(data);
       if (data.msg) thunkAPI.dispatch(setError(data));
-      thunkAPI.dispatch(loginUser(data));
+      else thunkAPI.dispatch(loginUser(data));
     } catch (error) {
       thunkAPI.dispatch(setError(error));
     }
@@ -78,7 +81,6 @@ export const signInUser = createAsyncThunk(
 export const signUpUser = createAsyncThunk(
   "auths/signUpUser",
   async (form, thunkAPI) => {
-    thunkAPI.dispatch(setLoading());
     const { email, password, name } = form;
     try {
       const response = await fetch("http://127.0.0.1:5000/signup", {
@@ -92,7 +94,7 @@ export const signUpUser = createAsyncThunk(
           password: password,
         }),
       });
-
+      thunkAPI.dispatch(setLoading());
       const data = await response.json();
       console.log(data);
       if (data.msg) thunkAPI.dispatch(setError(data));
@@ -107,15 +109,27 @@ export const fetchUsers = createAsyncThunk(
   "auths/fetchUsers",
   async (address, thunkAPI) => {
     const { dispatch } = thunkAPI;
-    dispatch(setLoading());
+    if (!localStorage.getItem("token")) {
+      setError(null);
+      return;
+    }
     const response = await fetch("http://127.0.0.1:5000/get_user", {
       method: "GET",
       headers: tokenConfig().headers,
     });
+    thunkAPI.dispatch(setLoading());
 
     const data = await response.json();
+
     if (data.msg) dispatch(setError(data));
     dispatch(getUser(data));
+  }
+);
+
+export const signOutUser = createAsyncThunk(
+  "auths/logoutUser",
+  async (args, thunkAPI) => {
+    thunkAPI.dispatch(logoutUser());
   }
 );
 
@@ -125,5 +139,6 @@ export const {
   loginUser,
   setError,
   setLoading,
+  logoutUser,
 } = authSlice.actions;
 export default authSlice.reducer;

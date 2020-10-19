@@ -8,6 +8,7 @@ import {
   MDBCardBody,
   MDBInput,
   MDBLink,
+  MDBAlert,
 } from "mdbreact";
 import "../../index.css";
 import { Link, useParams } from "react-router-dom";
@@ -24,6 +25,7 @@ const LogInPage = (props) => {
   const { isAuthenticated, loading, error } = useSelector(
     (state) => state.auths
   );
+  
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -55,6 +57,7 @@ const LogInPage = (props) => {
               </MDBRow>
             </div>
             <MDBCardBody className="mx-4 mt-4">
+              {error && <MDBAlert color="warning">{error}</MDBAlert>}
               <MDBInput
                 name="email"
                 onChange={handleChange}
@@ -84,6 +87,7 @@ const LogInPage = (props) => {
                   onClick={handleSubmit}
                   color="unique-color-dark"
                   type="button"
+                  disabled={loading}
                   className="btn-block text-white z-depth-2 unique-color-dark"
                 >
                   Log in

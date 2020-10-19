@@ -5,14 +5,6 @@ By considering each vote as transaction to be added to pending_transaction, whic
 is ready to be mined and included in a **Block**. And then the newly created block is added to the blockchain and broadcast
 to all the nodes.
 
-<!Configuration
-1. List of Voters: This list contains all eligible voters for the given election. 
-2. List of Candidates: This list outlines the individual subjects on which voters
-must decide.
-3. Election Type: This value determines the concrete voting mechanism, such as majority voting or single transferable voting (STV), and its parameters, e.g., how many options a voter can
-select in an STV.
-4. Election Start/End Times: These values specify the time frame in which eligible voters are
-allowed to cast their vote.!>
 
 # Features
 
@@ -25,9 +17,8 @@ allowed to cast their vote.!>
 
 #### The blockchain client has the following features:
 
-- Desktop based GUI app
-- Wallets generation using Public/Private key encryption (based on ecdsa)
-- Generation of transactions with ecdsa asymmetric encryption
+- React based Web App
+- Here is Client [README.md](/web_client/README.md)
 
 #### The blockchain API server for miners
 

@@ -8,8 +8,8 @@ const HomePage = () => {
   return (
     <React.Fragment>
       <MDBContainer className="my-5">
-          <AppIntro/>
-          <FeaturesPage/>
+        <AppIntro />
+        <FeaturesPage />
       </MDBContainer>
     </React.Fragment>
   );
@@ -43,77 +43,41 @@ const AppIntro = () => {
   );
 };
 
-
 const FeaturesPage = () => {
   return (
     <section className="my-5">
-      <h2 className="h1-responsive font-weight-bold text-center my-5">
+      <h2 className=" h1-responsive font-weight-bold text-center my-5">
         Why is it so great?
       </h2>
-      <p className="lead grey-text w-responsive text-center mx-auto mb-5">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-        ad minim veniam.
-      </p>
 
-      <MDBRow>
-        <MDBCol md="4" className="md-0 mb-5">
-          <MDBRow>
-            <MDBCol lg="2" md="3" size="2">
-              <MDBIcon icon="bullhorn" size="2x" className="blue-text" />
-            </MDBCol>
-            <MDBCol lg="10" md="9" size="10">
-              <h4 className="font-weight-bold">Marketing</h4>
-              <p className="grey-text">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                do eiusmod tempor incididunt ut labore et dolore magna
-                aliqua. Ut enim ad minim veniam.
-              </p>
-              <MDBBtn color="primary" size="sm">
-                Learn more
-              </MDBBtn>
-            </MDBCol>
-          </MDBRow>
+      <MDBRow className="mt-5 py-5">
+        <MDBCol md="4" className="md-0 mt-2 mb-5 vl-grey">
+          <h4 className="font-weight-bold">Immutable and Anonymous</h4>
+          <p className="feature-text my-3">
+            Polys is based on blockchain technology, which makes voting 100%
+            secure and immutable. Voter anonymity is guaranteed by transparent
+            crypto algorithms.
+          </p>
+        </MDBCol>
+        <MDBCol md="4" className="md-0 mb-5 vl-grey">
+          <h4 className="font-weight-bold">Easy to organize, easy to vote</h4>
+          <p className="feature-text my-3">
+            With Polys, creating a vote is intuitive, easy and fast. No coding
+            knowledge is required. Voting can be conducted on the go on a
+            smartphone or tablet.
+          </p>
         </MDBCol>
         <MDBCol md="4" className="md-0 mb-5">
-          <MDBRow>
-            <MDBCol lg="2" md="3" size="2">
-              <MDBIcon icon="cogs" size="2x" className="pink-text" />
-            </MDBCol>
-            <MDBCol lg="10" md="9" size="10">
-              <h4 className="font-weight-bold">Customization</h4>
-              <p className="grey-text">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                do eiusmod tempor incididunt ut labore et dolore magna
-                aliqua. Ut enim ad minim veniam.
-              </p>
-              <MDBBtn color="pink" size="sm">
-                Learn more
-              </MDBBtn>
-            </MDBCol>
-          </MDBRow>
-        </MDBCol>
-        <MDBCol md="4" className="md-0 mb-5">
-          <MDBRow>
-            <MDBCol lg="2" md="3" size="2">
-              <MDBIcon icon="tachometer-alt" size="2x" className="purple-text" />
-            </MDBCol>
-            <MDBCol lg="10" md="9" size="10">
-              <h4 className="font-weight-bold">Support</h4>
-              <p className="grey-text">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                do eiusmod tempor incididunt ut labore et dolore magna
-                aliqua. Ut enim ad minim veniam.
-              </p>
-              <MDBBtn color="purple" size="sm">
-                Learn more
-              </MDBBtn>
-            </MDBCol>
-          </MDBRow>
+          <h4 className="font-weight-bold">Transparent and auditable</h4>
+          <p className="feature-text my-3">
+            One of the main characteristics of blockchain technology is its
+            transparency. The crypto algorithms that we use on top of it are
+            merely mathematics.
+          </p>
         </MDBCol>
       </MDBRow>
     </section>
   );
-}
+};
 
 export default HomePage;

@@ -30,7 +30,6 @@ api = Blueprint('api', __name__)
 
 @api.route("/blockchain", methods=['GET'])
 def home():
-    print(blockchain.count())
     return jsonify({'chain': blockchain.serialize_chain(),
                     'pendingTransaction': [e.serialize() for e in blockchain.pendingTransaction],
                     'networkNode': blockchain.networkNodes})

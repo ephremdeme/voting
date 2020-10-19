@@ -7,6 +7,7 @@ import {
   MDBCard,
   MDBCardBody,
   MDBInput,
+  MDBAlert,
   MDBLink,
 } from "mdbreact";
 import "../../index.css";
@@ -57,6 +58,7 @@ const SignUpPage = (props) => {
               </MDBRow>
             </div>
             <MDBCardBody className="mx-4 mt-4">
+            {error && <MDBAlert color="warning">{error}</MDBAlert>}
               <MDBInput
                 onChange={handleChange}
                 name="name"
@@ -89,6 +91,7 @@ const SignUpPage = (props) => {
                   onClick={handleSubmit}
                   color="primary"
                   type="button"
+                  disabled={loading}
                   className="btn-block text-white z-depth-2 unique-color-dark btn-block z-depth-2"
                 >
                   Sign Up

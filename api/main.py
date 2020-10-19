@@ -55,7 +55,6 @@ def create_vote(current_user):
     voter_count = data['voter_count']
     candidates = data['candidates']
     vote_hash = votedb.vote_hash(name, organizer, current_user.id)
-    candidates.append("Giny")
     print(data, vote_hash, "\n", current_user.id)
 
     votedb.store_vote_candidates(candidates, vote_hash)
