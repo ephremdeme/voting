@@ -40,13 +40,17 @@ const CastVotePage = () => {
     console.log(radio);
   };
 
-  const { loading, error, name, address, message, candidates } = useSelector(
-    (state) => state.votes
-  );
+  const { error, message, candidates } = useSelector((state) => state.votes);
 
   useEffect(() => {
     dispatch(fetchCandidates(vote_hash));
   }, [vote_hash]);
+
+  useEffect(() => {
+    if (message || error) {
+      swapFormActive(1)(1)(null);
+    }
+  }, [message, error]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,8 +61,8 @@ const CastVotePage = () => {
   };
 
   const handleSubmit = () => {
-    dispatch(castVotes(voteData));
-    console.log(voteData);
+    if (voteData.candidate_addr) dispatch(castVotes(voteData));
+    else alert("Choose Candidate");
   };
 
   const swapFormActive = (a) => (param) => (e) => {
@@ -93,18 +97,10 @@ const CastVotePage = () => {
   const Alert = ({ message, type }) => {
     return (
       <div
-        className={`alert alert-${type} alert-dismissible fade show`}
+        className={`mx-3 alert alert-${type} alert-dismissible fade show`}
         role="alert"
       >
         {message}
-        <button
-          type="button"
-          className="close"
-          data-dismiss="alert"
-          aria-label="Close"
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
       </div>
     );
   };
