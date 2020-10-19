@@ -13,9 +13,10 @@ import {
 } from "mdbreact";
 import { postVote, getFile } from "./voteSlices";
 
-const CreateVotePage = () => {
+const CreateVotePage = (props) => {
   const dispatch = useDispatch();
   const { loading, error, name, address } = useSelector((state) => state.votes);
+  const { isAuthenticated } = useSelector((state) => state.auths);
 
   const [values, setValues] = useState({
     voter_count: null,
@@ -25,6 +26,8 @@ const CreateVotePage = () => {
   });
 
   const [candidate, setCandidate] = useState("");
+
+  if(!isAuthenticated) props.history.push("/login")
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,10 +52,14 @@ const CreateVotePage = () => {
     setCandidate("");
   };
 
-  if(address) dispatch(getFile(address))
+  if(address){
+    dispatch(getFile(address))
+    props.history.push("/admin");
+  } 
 
   const handleSubmit = () => {
     dispatch(postVote(values));
+
   };
 
   return (

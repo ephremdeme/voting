@@ -11,6 +11,9 @@
 .vl {
   border-right: 1px solid grey;
 }
+.vl-grey {
+  border-right: 1px solid #80808070;
+}
 
 .candidate-name {
   display: flex;
