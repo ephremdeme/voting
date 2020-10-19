@@ -19,11 +19,7 @@ const DashboardPage = () => {
   const handleClick = (hash) => {
     dispatch(fetchResult(hash));
     setAddress(hash);
-    console.log(hash);
   };
-
-  console.log(result);
-
   return (
     <React.Fragment>
       <MDBContainer fluid className=" dashboard">
@@ -31,7 +27,7 @@ const DashboardPage = () => {
           <MDBCol md="3" className="left px-2">
             <div className="my-3 ml-3">
               <Link
-                to="/create_vote"
+                to="/vote/create_vote"
                 rounded
                 outline
                 className="mx-2 btn btn-outline-default btn-rounded"
@@ -66,27 +62,31 @@ const DashboardPage = () => {
             {result.map((res, index) => (
               <CandidateResult total={total} candidate={res} key={index} />
             ))}
-            {address &&(
-            <MDBRow className="my-4 text-black">
-              <MDBCol>
-                <MDBBtn
-                  target="_blanc"
-                  href={`/vote/${address}/result`}
-                  outline
-                >
-                  Public Display
-                </MDBBtn>
-              </MDBCol>
-              <MDBCol>
-                <MDBBtn
-                  target="_blanc"
-                  href={`/vote/${address}/cast_vote`}
-                  outline
-                >
-                  Public Vote
-                </MDBBtn>
-              </MDBCol>
-            </MDBRow>)}
+            {address && (
+              <MDBRow className="my-4 text-black">
+                <MDBCol>
+                  <MDBBtn
+                    target="_blanc"
+                    href={`/vote/${address}/result`}
+                    outline
+                  >
+                    Public Display
+                  </MDBBtn>
+                </MDBCol>
+                <MDBCol>
+                  <MDBBtn
+                    target="_blanc"
+                    href={`/vote/${address}/cast_vote`}
+                    outline
+                  >
+                    Public Vote
+                  </MDBBtn>
+                </MDBCol>
+                <MDBCol className="text-center">
+                  <h3 className="title">People Voted : {total}</h3>
+                </MDBCol>
+              </MDBRow>
+            )}
           </MDBCol>
         </MDBRow>
       </MDBContainer>

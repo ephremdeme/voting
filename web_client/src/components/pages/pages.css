@@ -1,41 +1,46 @@
-
-.intro-title{
-    font-size: 2.1em;
-    font-weight: 500;
-    line-height: 1.5em;
+.intro-title {
+  font-size: 2.1em;
+  font-weight: 500;
+  line-height: 1.5em;
 }
 
-.intro-descr{
-    line-height: 1.5em;
-    font-size: 1.2em;
-    font-weight: 400;
+.intro-descr {
+  line-height: 1.5em;
+  font-size: 1.2em;
+  font-weight: 400;
 }
 
 .table-title {
-    margin-bottom: 20px;
-    text-align: center;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 .table {
-    background-color: #ffffff;
-    box-shadow: 2px 2px 15px -3px rgba(0, 0, 0, 0.75);
+  background-color: #ffffff;
+  box-shadow: 2px 2px 15px -3px rgba(0, 0, 0, 0.75);
 }
 
 .dashboard {
-    height: 85vh;
-    padding-left: 8%;
-    padding-right: 8%;
-    background-color: #8B97A8;
+  height: 85vh;
+  padding-left: 8%;
+  padding-right: 8%;
+  background-color: #8b97a8;
 }
 
 .left {
-    z-index: 3;
-    box-shadow: #8B97A8;
-    background-color: white;
-    border-right-width: 1px;
+  z-index: 3;
+  box-shadow: #8b97a8;
+  background-color: white;
+  border-right-width: 1px;
 }
 
 .right {
-    z-index: 1;
-    background-color: #F0F5FC;
+  z-index: 1;
+  background-color: #f0f5fc;
+}
+
+.feature-text {
+  font-size: 18px;
+  line-height: 1.55;
+  font-family: Roboto;
 }
