@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { useState } from "react";
 import {
   MDBNavbar,
   MDBNavbarBrand,
@@ -9,10 +9,12 @@ import {
   MDBNavLink,
   MDBIcon,
 } from "mdbreact";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { signOutUser } from "../auth/authSlices";
 
 const AppHeader = () => {
   const [collapse, setCollapse] = useState(false);
+  const dispatch = useDispatch();
 
   const { isAuthenticated, user } = useSelector((state) => state.auths);
 
@@ -21,6 +23,10 @@ const AppHeader = () => {
       collapse: !collapse,
     });
   };
+
+  const handleLogout=()=>{
+    dispatch(signOutUser())
+  }
 
   return (
     <MDBNavbar
@@ -46,14 +52,14 @@ const AppHeader = () => {
           )}
           <MDBNavItem className="mx-1">
             <MDBNavLink to="/explore">
-              <MDBIcon className="fas fa-search" />
+              <MDBIcon icon="fa-search" fab className="fas fa-search" />
               BlockChain Explore
             </MDBNavLink>
           </MDBNavItem>
 
           <MDBNavItem className="mx-1">
             <MDBNavLink to="/vote/create_vote">
-              <MDBIcon className="fas fa-plus" />
+              <MDBIcon fab icon="fa-plus" className="fas fa-plus" />
               Create Vote
             </MDBNavLink>
           </MDBNavItem>
@@ -77,7 +83,7 @@ const AppHeader = () => {
                 <MDBNavLink to="#!">{user.name}</MDBNavLink>
               </MDBNavItem>
               <MDBNavItem className="mx-1">
-                <MDBNavLink to="#!">Sign Out</MDBNavLink>
+                <MDBNavLink to="#!" onClick={ handleLogout}>Sign Out</MDBNavLink>
               </MDBNavItem>
             </React.Fragment>
           )}
