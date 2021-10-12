@@ -1,6 +1,6 @@
 openpyxl
 leveldb
-fastecdsa==1.7.3
+fastecdsa==2.1.2
 jsonpickle==1.1
 Flask==1.0.2
 requests==2.20.0
