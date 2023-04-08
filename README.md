@@ -40,6 +40,7 @@ git clone https://github.com/ephremdeme/voting.git
 ```text
 pip install -r requirements.txt
 ```
+Note: if fastecdsa gives "gmp.h" error with above command, use the command ```sudo apt-get install libgmp-dev```, then again try the above command.
 
 - First export Flask api app using `export FLASK_APP=api`
 - on linux terminal run `./run.sh`, this will apen a 6 tab terminal for 6 network nodes
